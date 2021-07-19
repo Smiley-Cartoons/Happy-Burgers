@@ -5,6 +5,21 @@ class Board {
         this.y_spaces = 100
         this.space_size = 10 // in px
         this._units = []
+
+        this.millis_per_tick
+    }
+
+    // Kicks off game clock ticking cycle
+    startGame() {
+        let gameIsOver = true;
+        while (!gameIsOver) {
+            _tick()
+        }
+    }
+
+    // Adjusts units for the current clock tick
+    _tick() {
+        // TODO: Position units
     }
 }
 

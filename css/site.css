@@ -1,6 +1,25 @@
 * {
     box-sizing: border-box;
 }
+
 body {
-    text-align:center;
+    margin: 0px;
+    height: 100vh;
+    background-color: hsl(0, 0%, 10%);
+    display: grid;
+    grid-template-rows: 15% 85%;
+}
+
+header {
+    padding: 0px;
+    width: 100%;
+    text-align: center;
+    color: antiquewhite;
+    font-family: sans-serif;
+}
+
+.game-container {
+    margin: 0px 5% 15px 5%;
+    background-color: hsl(180, 100%, 50%);
+    background-image: url('..\images\Restaurant-01.png');
 }
