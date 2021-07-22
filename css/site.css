@@ -18,8 +18,12 @@ header {
     font-family: sans-serif;
 }
 
+canvas {
+    background-color: hsl(120, 100%, 50%);
+}
+
 .game-container {
     margin: 0px 5% 15px 5%;
     background-color: hsl(180, 100%, 50%);
-    background-image: url('..\images\Restaurant-01.png');
+    background-image: url('../images/Restaurant-01.png');
 }

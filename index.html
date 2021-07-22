@@ -6,9 +6,18 @@
     <title>Happy Burgers</title>
     <link rel="stylesheet" href="css/site.css" />
     <script src="js/site.js"></script>
+    <script src="js/boards.js"></script>
 </head>
 <body>
     <header><h1>Happy Burgers (AKA Battle Burgers AKA Whatever)</h1></header>
-    <main class="game-container"></main>
+    <main class="game-container">
+        <canvas id="game_board_element">
+
+        </canvas>
+    </main>
+    <script>
+        const globalBoard = new Board()
+        window.addEventListener("resize", globalBoard.boardOnWindowResize)
+    </script>
 </body>
 </html>
