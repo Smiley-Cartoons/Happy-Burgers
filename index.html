@@ -10,14 +10,11 @@
 </head>
 <body>
     <header><h1>Happy Burgers (AKA Battle Burgers AKA Whatever)</h1></header>
-    <main class="game-container">
-        <canvas id="game_board_element">
-
-        </canvas>
-    </main>
+    <canvas id="game_board_element"></canvas>
     <script>
-        const globalBoard = new Board()
-        window.addEventListener("resize", globalBoard.boardOnWindowResize)
+        Board.init()
+        //window.addEventListener("resize", globalBoard.boardOnWindowResize) // this was a bad idea
+        Board.startGame()
     </script>
 </body>
 </html>
