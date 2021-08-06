@@ -30,7 +30,8 @@ Board = {
         Board.adjustBoard()
 
         Board._units.forEach((currentItem, index, array) => {
-            // TODO: Position units
+            currentItem.renderSelf(Board.canvas)
+            currentItem.renderHealthBar(Board.canvas)
         })
         
         // TODO: Verify that game is not over
