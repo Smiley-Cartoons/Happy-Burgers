@@ -1,49 +1,52 @@
+"use strict"
 // Board on which units live
-const Board = {
-    init: function() {
-        Board.canvas = document.getElementById("game_board_element")
-        Board.ctx = Board.canvas.getContext("2d");
-        Board.x_spaces = 100
-        Board.y_spaces = 120
-        Board._units = []
+class Board {
+    canvas: HTMLCanvasElement
+    ctx: CanvasRenderingContext2D
+    x_spaces: number
+    y_spaces: number
+    space_size: number
+    _units: Unit[] = null
+    millis_per_tick = 25
+    gameIsOver = false
 
-        Board.millis_per_tick = 25
+    constructor() {
+        this.canvas = document.getElementById("game_board_element") as HTMLCanvasElement
+        this.ctx = this.canvas.getContext("2d");
+        this.x_spaces = 100
+        this.y_spaces = 120
+        this._units = []
 
-        Board.gameIsOver = false
-    },
-    canvas: undefined,
-    ctx: undefined,
-    x_spaces: undefined,
-    y_spaces: undefined,
-    space_size: undefined, 
-    _units: [],
-    millis_per_tick: 25,
-    gameIsOver: false,
+        this.millis_per_tick = 25
+
+        this.gameIsOver = false
+    }
+    
 
     // Kicks off game clock ticking cycle
-    startGame: function() {
-        setTimeout(Board._tick, Board.millis_per_tick)
-    },
+    startGame() {
+        setTimeout(this._tick.bind(this), this.millis_per_tick)
+    }
 
     // Adjusts units for the current clock tick
-    _tick: function() {
+    _tick() {
         // Resize canvas
-        Board.adjustBoard()
+        this.adjustBoard()
 
-        Board._units.forEach((unit, index, array) => {
+        this._units.forEach((unit, index, array) => {
             unit._tick()
-            Board.renderUnit(unit)
+            this.renderUnit(unit)
         })
         
         // TODO: Verify that game is not over
-        if (Board.gameIsOver === false) {
-            setTimeout(Board._tick, Board.millis_per_tick)
+        if (this.gameIsOver === false) {
+            setTimeout(this._tick.bind(this), this.millis_per_tick)
         } else {
             // TODO: Add game wrap-up code
         }
-    },
+    }
 
-    adjustBoard: function() {
+    adjustBoard() {
         let w = document.documentElement.clientWidth
         let h = document.documentElement.clientHeight
 
@@ -52,29 +55,29 @@ const Board = {
         } else {
             w -= 10 // margin 5px
         }
-        Board.space_size = w / Board.x_spaces
+        this.space_size = w / this.x_spaces
 
-        Board.canvas.width = Board.space_size * Board.x_spaces
-        Board.canvas.height = Board.space_size * Board.y_spaces
-    },
+        this.canvas.width = this.space_size * this.x_spaces
+        this.canvas.height = this.space_size * this.y_spaces
+    }
 
-    renderUnit: function(unit) {
-        let space_size = Board.space_size
+    renderUnit(unit: Unit) {
+        let space_size = this.space_size
 
-        let ratio = (unit.image.width / unit.image.height) * space_size
+        let ratio = (unit.images.atRestImage.width / unit.images.atRestImage.height) * space_size
         let topLeftX = unit.x*space_size - ratio*unit.size/2
         let topLeftY = unit.y*space_size - ratio*unit.size/2
         let width = ratio*unit.size
         let height = space_size * unit.size
-        Board.ctx.drawImage(unit.image, 
+        this.ctx.drawImage(unit.images.atRestImage, 
                         topLeftX, topLeftY, 
                         width, height);
         
-        Board.renderHealthBars(unit)
-    },
+        this.renderHealthBars(unit)
+    }
 
-    renderHealthBars: function(unit) {
-        let space_size = Board.space_size
+    renderHealthBars(unit: Unit) {
+        let space_size = this.space_size
         
         let canvasX = unit.x*space_size
         let canvasY = unit.y*space_size
@@ -87,15 +90,15 @@ const Board = {
         if (width > unit.health_bar_width) {width = unit.health_bar_width}
         width *= space_size
 
-        Board.ctx.beginPath();
-        Board.ctx.rect(topLeftX, topLeftY, unit.health_bar_width*space_size, unit.health_bar_height*space_size);  
-        Board.ctx.fillStyle = "red";  
-        Board.ctx.fill();
+        this.ctx.beginPath();
+        this.ctx.rect(topLeftX, topLeftY, unit.health_bar_width*space_size, unit.health_bar_height*space_size);  
+        this.ctx.fillStyle = "red";  
+        this.ctx.fill();
 
-        Board.ctx.beginPath();
-        Board.ctx.rect(topLeftX, topLeftY, width, unit.health_bar_height*space_size);  
-        Board.ctx.fillStyle = "green";  
-        Board.ctx.fill();
+        this.ctx.beginPath();
+        this.ctx.rect(topLeftX, topLeftY, width, unit.health_bar_height*space_size);  
+        this.ctx.fillStyle = "green";  
+        this.ctx.fill();
     }
 }
 
@@ -128,3 +131,4 @@ class XYCoord {
         this.y = y
     }
 }
+
