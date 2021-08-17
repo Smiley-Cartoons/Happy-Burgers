@@ -1,5 +1,5 @@
 // Board on which units live
-Board = {
+const Board = {
     init: function() {
         Board.canvas = document.getElementById("game_board_element")
         Board.ctx = Board.canvas.getContext("2d");
@@ -101,11 +101,30 @@ Board = {
 
 // A path of points for units to travel down
 class Path {
+    points: XYCoord[] = null
     // Note: a path is basically an array of [x, y] pairs
-    constructor(points = [[0, 0], [10, 10]]) {
-        this._points = points
+    constructor(points?: XYCoord[]) {
+        if (points !== undefined) {
+            this.points = points
+        }
     }
-    point(n) {
-        return this._points[n]
+    point(n: number): XYCoord {
+        n = Math.round(n)
+        return this.points[n]
+    }
+    get start(): XYCoord {
+        return this.points[0]
+    }
+    get end(): XYCoord {
+        return this.points[this.points.length-1]
+    }
+}
+
+class XYCoord {
+    x: number = 0
+    y: number = 0
+    constructor(x: number, y: number) {
+        this.x = x
+        this.y = y
     }
 }
