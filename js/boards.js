@@ -2,9 +2,9 @@
 Board = {
     init: function() {
         Board.canvas = document.getElementById("game_board_element")
+        Board.ctx = Board.canvas.getContext("2d");
         Board.x_spaces = 100
-        Board.y_spaces = 50
-        Board.space_size = 10 // in px
+        Board.y_spaces = 120
         Board._units = []
 
         Board.millis_per_tick = 25
@@ -12,9 +12,10 @@ Board = {
         Board.gameIsOver = false
     },
     canvas: undefined,
+    ctx: undefined,
     x_spaces: undefined,
     y_spaces: undefined,
-    space_size: undefined, // in px
+    space_size: undefined, 
     _units: [],
     millis_per_tick: 25,
     gameIsOver: false,
@@ -29,9 +30,9 @@ Board = {
         // Resize canvas
         Board.adjustBoard()
 
-        Board._units.forEach((currentItem, index, array) => {
-            currentItem.renderSelf(Board.canvas)
-            currentItem.renderHealthBar(Board.canvas)
+        Board._units.forEach((unit, index, array) => {
+            unit._tick()
+            Board.renderUnit(unit)
         })
         
         // TODO: Verify that game is not over
@@ -43,34 +44,58 @@ Board = {
     },
 
     adjustBoard: function() {
-        let w = document.documentElement.clientWidth * 0.8; // margin 10% both sides
-        let h = document.documentElement.clientHeight * 0.8;
+        let w = document.documentElement.clientWidth
+        let h = document.documentElement.clientHeight
 
+        if (w >= 769) {
+            w = 759
+        } else {
+            w -= 10 // margin 5px
+        }
         Board.space_size = w / Board.x_spaces
 
         Board.canvas.width = Board.space_size * Board.x_spaces
         Board.canvas.height = Board.space_size * Board.y_spaces
     },
 
-    // DEPRECIATED. // To be added as an event listener to the window.
-    boardOnWindowResize() {
-        let board = globalBoard // Board works if a global Board is defigned. // TODO: fix Board janky code
-        // Get width and height of the window excluding scrollbars
-        let w = document.documentElement.clientWidth*0.9; // margin 5% both sides
-        let h = document.documentElement.clientHeight-15; // margin 15px bottom
+    renderUnit: function(unit) {
+        let space_size = Board.space_size
 
-        let boardRatio = board.x_spaces / board.y_spaces
-        let windowRatio = w / h
-        if (boardRatio > windowRatio) {
-            // window is narrower than board
-            board.space_size = h / board.y_spaces
-        } else {
-            // window is stretched more than board
-            board.space_size = w / board.x_spaces
-        }
-        let canvas = document.getElementById("game_board_element")
-        canvas.width = board.space_size * board.x_spaces
-        canvas.height = board.space_size * board.y_spaces
+        let ratio = (unit.image.width / unit.image.height) * space_size
+        let topLeftX = unit.x*space_size - ratio*unit.size/2
+        let topLeftY = unit.y*space_size - ratio*unit.size/2
+        let width = ratio*unit.size
+        let height = space_size * unit.size
+        Board.ctx.drawImage(unit.image, 
+                        topLeftX, topLeftY, 
+                        width, height);
+        
+        Board.renderHealthBars(unit)
+    },
+
+    renderHealthBars: function(unit) {
+        let space_size = Board.space_size
+        
+        let canvasX = unit.x*space_size
+        let canvasY = unit.y*space_size
+
+        let topLeftX = canvasX - unit.health_bar_width*space_size/2
+        let topLeftY = canvasY - space_size * unit.size/2 - unit.health_bar_height
+
+        let width = unit.health_bar_width * unit.health/unit.originalHealth
+        if (width < 0) {width = 0}
+        if (width > unit.health_bar_width) {width = unit.health_bar_width}
+        width *= space_size
+
+        Board.ctx.beginPath();
+        Board.ctx.rect(topLeftX, topLeftY, unit.health_bar_width*space_size, unit.health_bar_height*space_size);  
+        Board.ctx.fillStyle = "red";  
+        Board.ctx.fill();
+
+        Board.ctx.beginPath();
+        Board.ctx.rect(topLeftX, topLeftY, width, unit.health_bar_height*space_size);  
+        Board.ctx.fillStyle = "green";  
+        Board.ctx.fill();
     }
 }
 
