@@ -1,19 +1,22 @@
 ﻿<!DOCTYPE html>
 
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <title>Happy Burgers</title>
     <link rel="stylesheet" href="css/site.css" />
     <script src="js/site.js"></script>
     <script src="js/boards.js"></script>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
 </head>
 <body>
     <header><h1>Happy Burgers (AKA Battle Burgers AKA Whatever)</h1></header>
     <canvas id="game_board_element"></canvas>
     <script>
         Board.init()
-        //window.addEventListener("resize", globalBoard.boardOnWindowResize) // this was a bad idea
+        
+        let u = new Unit("images/Burger/Burger 01.png", 100, 20, 30, 20)
+        Board._units = [u]
         Board.startGame()
     </script>
 </body>

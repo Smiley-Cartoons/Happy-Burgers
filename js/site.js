@@ -1,37 +1,34 @@
 // JavaScript source code for doing stuff with the webpage(s)
 
 class Unit {
-    constructor(health, x, y) {
+    constructor(image, health, x, y, size = 10) {
         this.originalHealth = health
         this.health = health
         this.x = x
         this.y = y
-        this.size = 150
+        this.size = size
 
-        this.health_bar_width = 60
-        this.health_bar_height = 12
+        this.health_bar_width = 12
+        this.health_bar_height = 2
 
         this.image = new Image()
-        this.image.src = "images/Burger/Burger 01.png"
+        this.image.src = image
     }
 
-    renderHealthBar(canvas) {
-        let ctx = canvas.getContext("2d");
-        ctx.beginPath();
-        ctx.rect(this.x-this.health_bar_width/2, this.y-this.size/2-this.health_bar_height, this.health_bar_width, this.health_bar_height);  
-        ctx.fillStyle = "red";  
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.rect(this.x-this.health_bar_width/2, this.y-this.size/2-this.health_bar_height, this.health_bar_width*this.health/this.originalHealth, this.health_bar_height);  
-        ctx.fillStyle = "green";  
-        ctx.fill();
-    }
-
-    renderSelf(canvas) {
-        let ctx = canvas.getContext("2d");
-        let ratio = this.image.width/this.image.height
-        ctx.drawImage(this.image,this.x-ratio*this.size/2, this.y-this.size/2, ratio*this.size, this.size);
-                
+    _tick() {
+        // TODO: cycle through animation pics
+        // todo: remove example code
+        this.health -= 1
+        if (this.health < -20) {
+            this.health = 150
+        }
+        this.x += 0.2
+        if (this.x > Board.x_spaces) {
+            this.x = -10
+        }
+        this.y += 0.3
+        if (this.y > Board.y_spaces) {
+            this.y = -10
+        }
     }
 }
