@@ -9,6 +9,7 @@ class Unit {
     health_bar_width: number = 12
     health_bar_height: number = 2
     isFighting: boolean = false
+    direction: Direction = Direction.Down
 
     side: Franchise
     originalHealth: number
@@ -23,7 +24,7 @@ class Unit {
 
     constructor(images: UnitImages, side: Franchise, health: number, x: number, y: number, size: number = 10) {
         this.images = images
-        this.currentImage = images.atRestDownImage // todo: determine which image should be the initial image
+        this.currentImage = images.atRestImages.item(Direction.Down) // todo: determine which image should be the initial image
 
         this.side = side
 
@@ -33,8 +34,8 @@ class Unit {
         this.y = y
         this.size = size
 
-        this.health_bar_width = 12
-        this.health_bar_height = 2
+        this.health_bar_width = size*4/5
+        this.health_bar_height = this.health_bar_width/6
     }
 
     _tick(): void {        
@@ -67,8 +68,12 @@ class Unit {
             this.x += xMovement
             this.y += yMovement
 
-            let movementAngle = Math.atan2(xdis, -ydis) // minus ydis because in html +y is down
-            // todo: change direction (down, up, left, right) based on angle
+            // change direction (down, up, left, right) based on angle
+            let movementAngle = Math.atan2(xdis, -ydis)*180/Math.PI // minus ydis because in html +y is down
+            if (-135 < movementAngle && movementAngle < -45) { this.direction = Direction.Down}
+            else if (-45 < movementAngle && movementAngle < 45) { this.direction = Direction.Left}
+            else if (45 < movementAngle && movementAngle < 135) { this.direction = Direction.Up}
+            else { this.direction = Direction.Right}
         }
     }
 
@@ -76,31 +81,39 @@ class Unit {
         if (this.targetPosition == null) {
             return false
         }
-        return this.x !== this.targetPosition.x && this.y !== this.targetPosition.y
+        return this.x !== this.targetPosition.x || this.y !== this.targetPosition.y
     }
 }
 
 class UnitImages {
-    atRestDownImage: HTMLImageElement = null
-    atRestUpImage: HTMLImageElement = null
-    atRestLeftImage: HTMLImageElement = null
-    atRestRightImage: HTMLImageElement = null
+    atRestImages: UnitGroupItemsByDirection<HTMLImageElement> = null
 
-    movingDownImages: HTMLImageElement[] = null
-    movingUpImages: HTMLImageElement[] = null
-    movingLeftImages: HTMLImageElement[] = null
-    movingRightImages: HTMLImageElement[] = null
+    movingImages: UnitGroupItemsByDirection<HTMLImageElement[]> = null
+    fightingImages: UnitGroupItemsByDirection<HTMLImageElement[]> = null
+    dyingImages: UnitGroupItemsByDirection<HTMLImageElement[]> = null
+    constructor(atRestImages: UnitGroupItemsByDirection<HTMLImageElement> = null) {
+        if (atRestImages != null) {
+            this.atRestImages = atRestImages
+        }
+    }
+}
 
-    fightingDownImages: HTMLImageElement[] = null
-    fightingUpImages: HTMLImageElement[] = null
-    fightingLeftImages: HTMLImageElement[] = null
-    fightingRightImages: HTMLImageElement[] = null
-
-    dyingDownImages: HTMLImageElement[] = null
-    dyingUpImages: HTMLImageElement[] = null
-    dyingLeftImages: HTMLImageElement[] = null
-    dyingRightImages: HTMLImageElement[] = null
+class UnitGroupItemsByDirection<T> {
+    private items: T[]
+    constructor(upItem: T, downItem: T, leftItem: T, rightItem: T) {
+        this.items = [upItem, downItem, leftItem, rightItem]
+    }
+    item(n: Direction): T {
+        return this.items[n]
+    }
 }
 
 // which side the unit is on, the franchise that makes it and sends it to battle
 type Franchise = "Red" | "Blue"
+
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right
+}

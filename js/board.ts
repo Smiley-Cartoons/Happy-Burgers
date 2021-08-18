@@ -139,9 +139,9 @@ function StartGame(): void {
     board = new Board()
 
     let images = new UnitImages()
-    images.atRestDownImage = new Image()
-    images.atRestDownImage.src = "images/Burger/Burger 01.png"
-    let u1 = new Unit(images, "Blue", 100, 20, 30, 20)
+    images.atRestImages = new UnitGroupItemsByDirection(new Image(), new Image(), new Image(), new Image())
+    images.atRestImages.item(Direction.Down).src = "images/Burger/Burger 01.png"
+    let u1 = new Unit(images, "Blue", 100, 20, 30)
     let u2 = new Unit(images, "Red", 100, 40, 30, 20)
     board._units.push(u1)
     board._units.push(u2)
