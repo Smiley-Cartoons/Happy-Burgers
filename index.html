@@ -13,14 +13,7 @@
     <header><h1>Happy Burgers (AKA Battle Burgers AKA Whatever)</h1></header>
     <canvas id="game_board_element"></canvas>
     <script>
-        let board = new Board()
-        
-        let images = new UnitImages()
-        images.atRestImage = new Image()
-        images.atRestImage.src = "images/Burger/Burger 01.png"
-        let u = new Unit(images, 100, 20, 30, 20)
-        board._units = [u]
-        board.startGame()
+        StartGame()
     </script>
 </body>
 </html>

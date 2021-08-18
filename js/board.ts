@@ -64,12 +64,12 @@ class Board {
     renderUnit(unit: Unit) {
         let space_size = this.space_size
 
-        let ratio = (unit.images.atRestImage.width / unit.images.atRestImage.height) * space_size
+        let ratio = (unit.currentImage.width / unit.currentImage.height) * space_size
         let topLeftX = unit.x*space_size - ratio*unit.size/2
         let topLeftY = unit.y*space_size - ratio*unit.size/2
         let width = ratio*unit.size
         let height = space_size * unit.size
-        this.ctx.drawImage(unit.images.atRestImage, 
+        this.ctx.drawImage(unit.currentImage, 
                         topLeftX, topLeftY, 
                         width, height);
         
@@ -132,3 +132,18 @@ class XYCoord {
     }
 }
 
+
+
+let board: Board = null
+function StartGame(): void {       
+    board = new Board()
+
+    let images = new UnitImages()
+    images.atRestDownImage = new Image()
+    images.atRestDownImage.src = "images/Burger/Burger 01.png"
+    let u1 = new Unit(images, "Blue", 100, 20, 30, 20)
+    let u2 = new Unit(images, "Red", 100, 40, 30, 20)
+    board._units.push(u1)
+    board._units.push(u2)
+    board.startGame()
+}
