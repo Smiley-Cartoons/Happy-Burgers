@@ -70,7 +70,7 @@ class Unit {
         if (this.targetPosition == null) {
             return false;
         }
-        return this.x !== this.targetPosition.x && this.y !== this.targetPosition.y;
+        return this.x !== this.targetPosition.x || this.y !== this.targetPosition.y;
     }
 }
 class UnitImages {
