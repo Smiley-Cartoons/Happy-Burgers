@@ -30,7 +30,7 @@ h1 {
 canvas {
     margin: 5px;
     margin-bottom: 120px;
-    background-color: hsl(130, 100%, 30%);
+    background-color: hsl(130, 100%, 25%);
 }
 
 .unit-card-container {

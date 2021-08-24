@@ -92,12 +92,12 @@ class Board {
 
         this.ctx.beginPath();
         this.ctx.rect(topLeftX, topLeftY, unit.health_bar_width*space_size, unit.health_bar_height*space_size);  
-        this.ctx.fillStyle = "red";  
+        this.ctx.fillStyle = "hsl(0, 100%, 60%)";  
         this.ctx.fill();
 
         this.ctx.beginPath();
         this.ctx.rect(topLeftX, topLeftY, width, unit.health_bar_height*space_size);  
-        this.ctx.fillStyle = "green";  
+        this.ctx.fillStyle = "hsl(130, 100%, 50%)";  
         this.ctx.fill();
     }
 }
@@ -138,11 +138,35 @@ let board: Board = null
 function StartGame(): void {       
     board = new Board()
 
+    const RedTowerPoint = new XYCoord(board.x_spaces/2, 20)
+    const BlueTowerPoint = new XYCoord(board.x_spaces/2, board.y_spaces-20)
+
+    const NWPoint = new XYCoord(25, 30)
+    const WPoint = new XYCoord(25, board.y_spaces/2)
+    const SWPoint = new XYCoord(25, board.y_spaces-30)
+    const NEPoint = new XYCoord(board.x_spaces-25, 30)
+    const EPoint = new XYCoord(board.x_spaces-25, board.y_spaces/2)
+    const SEPoint = new XYCoord(board.x_spaces-25, board.y_spaces-30)
+
+    const RedToBlueLeftPath = new Path([RedTowerPoint, NWPoint, WPoint, SWPoint, BlueTowerPoint])
+    const RedToBlueRightPath = new Path([RedTowerPoint, NEPoint, EPoint, SEPoint, BlueTowerPoint])
+    const BlueToRedLeftPath = new Path(RedToBlueLeftPath.points.filter(() => true).reverse())
+    const BlueToRedRightPath = new Path(RedToBlueRightPath.points.filter(() => true).reverse())
+
+    let restaurantImages = new UnitImages()
+    restaurantImages.atRestImages = new UnitGroupItemsByDirection(new Image(), new Image(), new Image(), new Image())
+    restaurantImages.atRestImages.item(Direction.Down).src = "images/Restaurant/Restaurant-01.png"
+    const RedRestaurant = new Unit(restaurantImages, "Red", 1200, RedTowerPoint.x, RedTowerPoint.y, 30)
+    const BlueRestaurant = new Unit(restaurantImages, "Red", 1200, BlueTowerPoint.x, BlueTowerPoint.y, 30)
+    
+    board._units.push(RedRestaurant)
+    board._units.push(BlueRestaurant)
+
     let images = new UnitImages()
     images.atRestImages = new UnitGroupItemsByDirection(new Image(), new Image(), new Image(), new Image())
     images.atRestImages.item(Direction.Down).src = "images/Burger/Burger 01.png"
-    let u1 = new Unit(images, "Blue", 100, 20, 30)
-    let u2 = new Unit(images, "Red", 100, 40, 30, 20)
+    let u1 = new Unit(images, "Blue", 100, 20, 40)
+    let u2 = new Unit(images, "Red", 100, 40, 40, 15)
     board._units.push(u1)
     board._units.push(u2)
     board.startGame()
