@@ -54,6 +54,9 @@ canvas {
     align-items: center;
     justify-content: center;
 }
+.unit-card:hover {
+    background-color: hsl(47, 100%, 55%);
+}
 .unit-card img {
     height: 110px;
 }

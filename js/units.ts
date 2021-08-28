@@ -22,6 +22,14 @@ class Unit {
     // where the unit is going to
     targetPosition: XYCoord = null
 
+    /**
+     * @param  {UnitImages} images images used for this's animations.
+     * @param  {Franchise} side whether this is fighting for the blue side or the red side
+     * @param  {number} health
+     * @param  {number} x board x coordinate
+     * @param  {number} y board y coordinate
+     * @param  {number=10} size diameter of unit in board spaces
+     */
     constructor(images: UnitImages, side: Franchise, health: number, x: number, y: number, size: number = 10) {
         this.images = images
         this.currentImage = images.atRestImages.item(Direction.Down) // todo: determine which image should be the initial image
