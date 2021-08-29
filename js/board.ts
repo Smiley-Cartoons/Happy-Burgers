@@ -1,4 +1,10 @@
 "use strict"
+
+let board: Board = null
+
+let thereIsDropUnit: boolean = false
+const dropUnitId = "drop-unit"
+
 // Board on which units live
 class Board {
     canvas: HTMLCanvasElement
@@ -134,9 +140,59 @@ class XYCoord {
 
 
 
-let board: Board = null
+//###################### SITE FUNCTIONS ######################//
+
+function RenderUnitCards(): void {
+
+}
+
+function UnitCardClickEvent(event: MouseEvent): void {
+    if (thereIsDropUnit == false) {
+        let dropUnit = document.createElement("div")
+        dropUnit.id = dropUnitId
+        dropUnit.innerHTML = `<img src="images/Burger/Burger 01.png">`
+        dropUnit.className = "unit-card"
+        dropUnit.style.position = "fixed"
+
+        // todo: replace numver literal 55 with half card height and width
+        dropUnit.style.top = `${event.y - 55}px`
+        dropUnit.style.left = `${event.x - 55}px`
+
+        //dropUnit.onmousemove = DropUnitMouseMove
+        dropUnit.onclick = (event) => {board.canvas.onclick(event)}
+        document.body.appendChild(dropUnit)
+        thereIsDropUnit = true
+    }
+}
+
+// TODO: Depreciate this method - it doesn't work on mobile and it messes up desktop
+function DropUnitMouseMove(event: MouseEvent): void {
+    let dropUnit = document.getElementById(dropUnitId)
+    // todo: replace numver literal 55 with half card height and width
+    dropUnit.style.top = `${event.y - 55}px`
+    dropUnit.style.left = `${event.x - 55}px`
+}
+
+function DropUnitClickEvent(event: MouseEvent): void {
+    // calculate where the unit would be on the canvas
+    let mouseBoardX = event.offsetX / board.space_size
+    let mouseBoardY = event.offsetY / board.space_size
+    // drop it there
+    document.getElementById(dropUnitId).remove()    
+    thereIsDropUnit = false
+
+    let images = new UnitImages()
+    images.atRestImages = new UnitGroupItemsByDirection(new Image(), new Image(), new Image(), new Image())
+    images.atRestImages.item(Direction.Down).src = "images/Burger/Burger 01.png"
+    let newUnit = new Unit(images, "Blue", 100, mouseBoardX, mouseBoardY)
+    board._units.push(newUnit)
+}
+
+
+
 function StartGame(): void {       
     board = new Board()
+    board.canvas.onclick = DropUnitClickEvent
 
     const RedTowerPoint = new XYCoord(board.x_spaces/2, 20)
     const BlueTowerPoint = new XYCoord(board.x_spaces/2, board.y_spaces-20)
