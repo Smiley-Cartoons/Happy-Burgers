@@ -32,8 +32,9 @@ class Unit {
      */
     constructor(images: UnitImages, side: Franchise, health: number, x: number, y: number, size: number = 10) {
         this.images = images
-        this.currentImage = images.atRestImages.item(Direction.Down) // todo: determine which image should be the initial image
-
+        if (images != null) {
+            this.currentImage = images.atRestImages.item(Direction.Down) // todo: determine which image should be the initial image
+        }
         this.side = side
 
         this.originalHealth = health

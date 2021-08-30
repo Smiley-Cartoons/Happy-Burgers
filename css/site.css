@@ -60,6 +60,9 @@ canvas {
 .unit-card img {
     height: 110px;
 }
+.unit-card-selected {
+    box-shadow: 0px 0px 8px 4px hsl(180, 100%, 50%);
+}
 
 @media screen and (min-width: 769px) {
     canvas {

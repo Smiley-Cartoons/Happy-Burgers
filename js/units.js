@@ -20,7 +20,9 @@ class Unit {
         // where the unit is going to
         this.targetPosition = null;
         this.images = images;
-        this.currentImage = images.atRestImages.item(Direction.Down); // todo: determine which image should be the initial image
+        if (images != null) {
+            this.currentImage = images.atRestImages.item(Direction.Down); // todo: determine which image should be the initial image
+        }
         this.side = side;
         this.originalHealth = health;
         this.health = health;

@@ -1,7 +1,10 @@
 "use strict";
 let board = null;
+let unitCardContainer = null;
 let thereIsDropUnit = false;
 const dropUnitId = "drop-unit";
+let unitCardUnits = [];
+let selectedDropUnit = null;
 // Board on which units live
 class Board {
     constructor() {
@@ -112,47 +115,50 @@ class XYCoord {
     }
 }
 //###################### SITE FUNCTIONS ######################//
-function RenderUnitCards() {
-}
-function UnitCardClickEvent(event) {
-    if (thereIsDropUnit == false) {
-        let dropUnit = document.createElement("div");
-        dropUnit.id = dropUnitId;
-        dropUnit.innerHTML = `<img src="images/Burger/Burger 01.png">`;
-        dropUnit.className = "unit-card";
-        dropUnit.style.position = "fixed";
-        // todo: replace numver literal 55 with half card height and width
-        dropUnit.style.top = `${event.y - 55}px`;
-        dropUnit.style.left = `${event.x - 55}px`;
-        //dropUnit.onmousemove = DropUnitMouseMove
-        dropUnit.onclick = (event) => { board.canvas.onclick(event); };
-        document.body.appendChild(dropUnit);
-        thereIsDropUnit = true;
+function RenderUnitCards(units) {
+    unitCardUnits = [];
+    let index = 0;
+    for (let unit of units) {
+        const newCard = document.createElement("div");
+        newCard.id = `unit-card${index}`;
+        unitCardUnits.push(unit);
+        newCard.className = "unit-card";
+        newCard.innerHTML = `<img src="${unit.images.atRestImages.item(Direction.Down).src}">`;
+        let num = index;
+        newCard.onclick = (event) => { UnitCardClickEvent(event, newCard.id, num); };
+        unitCardContainer.appendChild(newCard);
+        index++;
     }
 }
-// TODO: Depreciate this method - it doesn't work on mobile and it messes up desktop
-function DropUnitMouseMove(event) {
-    let dropUnit = document.getElementById(dropUnitId);
-    // todo: replace numver literal 55 with half card height and width
-    dropUnit.style.top = `${event.y - 55}px`;
-    dropUnit.style.left = `${event.x - 55}px`;
+function UnitCardClickEvent(event, unitCardId, index) {
+    selectedDropUnit = Object.assign({}, unitCardUnits[index]);
+    DeselectUnitCards();
+    document.getElementById(unitCardId).classList.add("unit-card-selected");
 }
-function DropUnitClickEvent(event) {
-    // calculate where the unit would be on the canvas
-    let mouseBoardX = event.offsetX / board.space_size;
-    let mouseBoardY = event.offsetY / board.space_size;
-    // drop it there
-    document.getElementById(dropUnitId).remove();
-    thereIsDropUnit = false;
-    let images = new UnitImages();
-    images.atRestImages = new UnitGroupItemsByDirection(new Image(), new Image(), new Image(), new Image());
-    images.atRestImages.item(Direction.Down).src = "images/Burger/Burger 01.png";
-    let newUnit = new Unit(images, "Blue", 100, mouseBoardX, mouseBoardY);
-    board._units.push(newUnit);
+function CanvasClickEvent(event) {
+    if (selectedDropUnit != null) {
+        // calculate where the unit would be on the canvas
+        let mouseBoardX = event.offsetX / board.space_size;
+        let mouseBoardY = event.offsetY / board.space_size;
+        // drop it there 
+        let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.size);
+        newUnit = Object.assign(newUnit, selectedDropUnit);
+        newUnit.x = mouseBoardX;
+        newUnit.y = mouseBoardY;
+        board._units.push(newUnit);
+        DeselectUnitCards();
+        selectedDropUnit = null;
+    }
+}
+function DeselectUnitCards() {
+    for (let unitCard of unitCardContainer.children) {
+        unitCard.classList.remove("unit-card-selected");
+    }
 }
 function StartGame() {
     board = new Board();
-    board.canvas.onclick = DropUnitClickEvent;
+    board.canvas.onclick = CanvasClickEvent;
+    unitCardContainer = document.getElementById("unit-card-container");
     const RedTowerPoint = new XYCoord(board.x_spaces / 2, 20);
     const BlueTowerPoint = new XYCoord(board.x_spaces / 2, board.y_spaces - 20);
     const NWPoint = new XYCoord(25, 30);
@@ -179,5 +185,7 @@ function StartGame() {
     let u2 = new Unit(images, "Red", 100, 40, 40, 15);
     board._units.push(u1);
     board._units.push(u2);
+    let units = [...[BlueRestaurant, u1]];
+    RenderUnitCards(units);
     board.startGame();
 }
