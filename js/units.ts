@@ -33,7 +33,7 @@ class Unit {
     constructor(images: UnitImages, side: Franchise, health: number, x: number, y: number, size: number = 10) {
         this.images = images
         if (images != null) {
-            this.currentImage = images.atRestImages.item(Direction.Down) // todo: determine which image should be the initial image
+            this.currentImage = images.atRestImages.item(Direction.Down)[0] // todo: determine which image should be the initial image
         }
         this.side = side
 
@@ -61,7 +61,7 @@ class Unit {
         }
         else {
             // todo: make the unit be at rest
-            this.currentImage = this.images.atRestImages.item(this.direction)
+            this.currentImage = this.images.atRestImages.item(this.direction)[0]
         }
     }
 
@@ -110,24 +110,32 @@ class Unit {
 }
 
 class UnitImages {
-    atRestImages: UnitGroupItemsByDirection<HTMLImageElement> = null
+    atRestImages: UnitGroupItemsByDirection = null
 
-    movingImages: UnitGroupItemsByDirection<HTMLImageElement[]> = null
-    fightingImages: UnitGroupItemsByDirection<HTMLImageElement[]> = null
-    dyingImages: UnitGroupItemsByDirection<HTMLImageElement[]> = null
-    constructor(atRestImages: UnitGroupItemsByDirection<HTMLImageElement> = null) {
+    movingImages: UnitGroupItemsByDirection = null
+    fightingImages: UnitGroupItemsByDirection = null
+    dyingImages: UnitGroupItemsByDirection = null
+    constructor(atRestImages: UnitGroupItemsByDirection = null) {
         if (atRestImages != null) {
             this.atRestImages = atRestImages
         }
     }
 }
 
-class UnitGroupItemsByDirection<T> {
-    private items: T[]
-    constructor(upItem: T, downItem: T, leftItem: T, rightItem: T) {
-        this.items = [upItem, downItem, leftItem, rightItem]
+class UnitGroupItemsByDirection {
+    private items: HTMLImageElement[][]
+    constructor(upItem: string[], downItem: string[], leftItem: string[], rightItem: string[]) {
+        for (let item of [upItem, downItem, leftItem, rightItem]) {
+            let newItem: HTMLImageElement[]
+            for (let src of item) {
+                let newI = new Image()
+                newI.src = src
+                newItem.push(newI)
+            }
+            this.items.push(newItem)
+        }
     }
-    item(n: Direction): T {
+    item(n: Direction): HTMLImageElement[] {
         return this.items[n]
     }
 }

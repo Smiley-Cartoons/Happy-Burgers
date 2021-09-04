@@ -21,7 +21,7 @@ class Unit {
         this.targetPosition = null;
         this.images = images;
         if (images != null) {
-            this.currentImage = images.atRestImages.item(Direction.Down); // todo: determine which image should be the initial image
+            this.currentImage = images.atRestImages.item(Direction.Down)[0]; // todo: determine which image should be the initial image
         }
         this.side = side;
         this.originalHealth = health;
@@ -38,6 +38,7 @@ class Unit {
         }
         else if (this.isFighting) {
             // todo: fight
+            //this.calcDirection(this.x - // todo: get opponent x, this.y - // todo: get opponent y)
         }
         else if (this.doesWantToTravel) { // move towards target position
             this.moveToTargetPosition();
@@ -45,8 +46,13 @@ class Unit {
         }
         else {
             // todo: make the unit be at rest
+            this.currentImage = this.images.atRestImages.item(this.direction)[0];
         }
     }
+    /**
+     * Moves this towards this.targetPosition by this.speed per call.
+     * Also auto has this.direction re-calculated
+     */
     moveToTargetPosition() {
         let xdis = this.targetPosition.x - this.x;
         let ydis = this.targetPosition.y - this.y;
@@ -60,20 +66,28 @@ class Unit {
             let yMovement = this.speed * ydis / netdis;
             this.x += xMovement;
             this.y += yMovement;
-            // change direction (down, up, left, right) based on angle
-            let movementAngle = Math.atan2(xdis, -ydis) * 180 / Math.PI; // minus ydis because in html +y is down
-            if (-135 < movementAngle && movementAngle < -45) {
-                this.direction = Direction.Down;
-            }
-            else if (-45 < movementAngle && movementAngle < 45) {
-                this.direction = Direction.Left;
-            }
-            else if (45 < movementAngle && movementAngle < 135) {
-                this.direction = Direction.Up;
-            }
-            else {
-                this.direction = Direction.Right;
-            }
+            this.calcDirection(xdis, ydis);
+        }
+    }
+    /**
+     * Sets this.direction based on where the target is that this should face towards
+     * @param xdis x board distance between this and target it should be facing
+     * @param ydis y board distance between this and target it should be facing
+     */
+    calcDirection(xdis, ydis) {
+        // change direction (down, up, left, right) based on angle
+        let movementAngle = Math.atan2(xdis, -ydis) * 180 / Math.PI; // minus ydis because in html and on the board +y is down
+        if (-135 < movementAngle && movementAngle < -45) {
+            this.direction = Direction.Down;
+        }
+        else if (-45 < movementAngle && movementAngle < 45) {
+            this.direction = Direction.Left;
+        }
+        else if (45 < movementAngle && movementAngle < 135) {
+            this.direction = Direction.Up;
+        }
+        else {
+            this.direction = Direction.Right;
         }
     }
     get doesWantToTravel() {
@@ -96,7 +110,15 @@ class UnitImages {
 }
 class UnitGroupItemsByDirection {
     constructor(upItem, downItem, leftItem, rightItem) {
-        this.items = [upItem, downItem, leftItem, rightItem];
+        for (let item of [upItem, downItem, leftItem, rightItem]) {
+            let newItem;
+            for (let src of item) {
+                let newI = new Image();
+                newI.src = src;
+                newItem.push(newI);
+            }
+            this.items.push(newItem);
+        }
     }
     item(n) {
         return this.items[n];
