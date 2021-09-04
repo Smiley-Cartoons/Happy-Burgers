@@ -1,4 +1,7 @@
 "use strict";
+/**
+ * A tower/soldier/whatever to fight for a Side on a game Board
+ */
 class Unit {
     /**
      * @param  {UnitImages} images images used for this's animations.
@@ -20,7 +23,9 @@ class Unit {
         // where the unit is going to
         this.targetPosition = null;
         this.images = images;
-        this.currentImage = images.atRestImages.item(Direction.Down); // todo: determine which image should be the initial image
+        if (images != null) {
+            this.currentImage = images.atRestImages.item(Direction.Down)[0]; // todo: determine which image should be the initial image
+        }
         this.side = side;
         this.originalHealth = health;
         this.health = health;
@@ -36,6 +41,7 @@ class Unit {
         }
         else if (this.isFighting) {
             // todo: fight
+            //this.calcDirection(this.x - // todo: get opponent x, this.y - // todo: get opponent y)
         }
         else if (this.doesWantToTravel) { // move towards target position
             this.moveToTargetPosition();
@@ -43,8 +49,13 @@ class Unit {
         }
         else {
             // todo: make the unit be at rest
+            this.currentImage = this.images.atRestImages.item(this.direction)[0];
         }
     }
+    /**
+     * Moves this towards this.targetPosition by this.speed per call.
+     * Also auto has this.direction re-calculated
+     */
     moveToTargetPosition() {
         let xdis = this.targetPosition.x - this.x;
         let ydis = this.targetPosition.y - this.y;
@@ -58,20 +69,28 @@ class Unit {
             let yMovement = this.speed * ydis / netdis;
             this.x += xMovement;
             this.y += yMovement;
-            // change direction (down, up, left, right) based on angle
-            let movementAngle = Math.atan2(xdis, -ydis) * 180 / Math.PI; // minus ydis because in html +y is down
-            if (-135 < movementAngle && movementAngle < -45) {
-                this.direction = Direction.Down;
-            }
-            else if (-45 < movementAngle && movementAngle < 45) {
-                this.direction = Direction.Left;
-            }
-            else if (45 < movementAngle && movementAngle < 135) {
-                this.direction = Direction.Up;
-            }
-            else {
-                this.direction = Direction.Right;
-            }
+            this.calcDirection(xdis, ydis);
+        }
+    }
+    /**
+     * Sets this.direction based on where the target is that this should face towards
+     * @param xdis x board distance between this and target it should be facing
+     * @param ydis y board distance between this and target it should be facing
+     */
+    calcDirection(xdis, ydis) {
+        // change direction (down, up, left, right) based on angle
+        let movementAngle = Math.atan2(xdis, -ydis) * 180 / Math.PI; // minus ydis because in html and on the board +y is down
+        if (-135 < movementAngle && movementAngle < -45) {
+            this.direction = Direction.Down;
+        }
+        else if (-45 < movementAngle && movementAngle < 45) {
+            this.direction = Direction.Left;
+        }
+        else if (45 < movementAngle && movementAngle < 135) {
+            this.direction = Direction.Up;
+        }
+        else {
+            this.direction = Direction.Right;
         }
     }
     get doesWantToTravel() {
@@ -81,7 +100,16 @@ class Unit {
         return this.x !== this.targetPosition.x || this.y !== this.targetPosition.y;
     }
 }
+/**
+ * Container for a Unit's image objects. Those images are grouped by animation,
+ * then by direction through the UnitGroupItemsByDirection class
+ */
 class UnitImages {
+    /**
+     * Creates a new UnitImages object.
+     * If a UnitGroupItemsByDirection object is given, it sets it as this.atRestImages.
+     * @param atRestImages The images used by a Unit when it is not moving.
+     */
     constructor(atRestImages = null) {
         this.atRestImages = null;
         this.movingImages = null;
@@ -92,14 +120,33 @@ class UnitImages {
         }
     }
 }
+/**
+ * Divides a UnitImages animation into arrays of images for each value of Direction .
+ */
 class UnitGroupItemsByDirection {
     constructor(upItem, downItem, leftItem, rightItem) {
-        this.items = [upItem, downItem, leftItem, rightItem];
+        for (let item of [upItem, downItem, leftItem, rightItem]) {
+            let newItem;
+            for (let src of item) {
+                let newI = new Image();
+                newI.src = src;
+                newItem.push(newI);
+            }
+            this.items.push(newItem);
+        }
     }
+    /**
+     * Returns an array of images which are an animation as seen from Direction n.
+     * @param n a Direction value
+     * @returns an array of images which are an animation as seen from Direction n.
+     */
     item(n) {
         return this.items[n];
     }
 }
+/**
+ * A direction from which a user may view a Unit's animation.
+ */
 var Direction;
 (function (Direction) {
     Direction[Direction["Up"] = 0] = "Up";
