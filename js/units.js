@@ -1,4 +1,7 @@
 "use strict";
+/**
+ * A tower/soldier/whatever to fight for a Side on a game Board
+ */
 class Unit {
     /**
      * @param  {UnitImages} images images used for this's animations.
@@ -97,7 +100,16 @@ class Unit {
         return this.x !== this.targetPosition.x || this.y !== this.targetPosition.y;
     }
 }
+/**
+ * Container for a Unit's image objects. Those images are grouped by animation,
+ * then by direction through the UnitGroupItemsByDirection class
+ */
 class UnitImages {
+    /**
+     * Creates a new UnitImages object.
+     * If a UnitGroupItemsByDirection object is given, it sets it as this.atRestImages.
+     * @param atRestImages The images used by a Unit when it is not moving.
+     */
     constructor(atRestImages = null) {
         this.atRestImages = null;
         this.movingImages = null;
@@ -108,6 +120,9 @@ class UnitImages {
         }
     }
 }
+/**
+ * Divides a UnitImages animation into arrays of images for each value of Direction .
+ */
 class UnitGroupItemsByDirection {
     constructor(upItem, downItem, leftItem, rightItem) {
         for (let item of [upItem, downItem, leftItem, rightItem]) {
@@ -120,10 +135,18 @@ class UnitGroupItemsByDirection {
             this.items.push(newItem);
         }
     }
+    /**
+     * Returns an array of images which are an animation as seen from Direction n.
+     * @param n a Direction value
+     * @returns an array of images which are an animation as seen from Direction n.
+     */
     item(n) {
         return this.items[n];
     }
 }
+/**
+ * A direction from which a user may view a Unit's animation.
+ */
 var Direction;
 (function (Direction) {
     Direction[Direction["Up"] = 0] = "Up";

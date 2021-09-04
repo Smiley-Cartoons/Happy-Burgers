@@ -1,5 +1,8 @@
 "use strict"
 
+/**
+ * A tower/soldier/whatever to fight for a Side on a game Board
+ */
 class Unit {
     images: UnitImages
     currentImage: HTMLImageElement
@@ -109,12 +112,22 @@ class Unit {
     }
 }
 
+/**
+ * Container for a Unit's image objects. Those images are grouped by animation, 
+ * then by direction through the UnitGroupItemsByDirection class
+ */
 class UnitImages {
     atRestImages: UnitGroupItemsByDirection = null
 
     movingImages: UnitGroupItemsByDirection = null
     fightingImages: UnitGroupItemsByDirection = null
     dyingImages: UnitGroupItemsByDirection = null
+
+    /**
+     * Creates a new UnitImages object.
+     * If a UnitGroupItemsByDirection object is given, it sets it as this.atRestImages.
+     * @param atRestImages The images used by a Unit when it is not moving.
+     */
     constructor(atRestImages: UnitGroupItemsByDirection = null) {
         if (atRestImages != null) {
             this.atRestImages = atRestImages
@@ -122,6 +135,9 @@ class UnitImages {
     }
 }
 
+/**
+ * Divides a UnitImages animation into arrays of images for each value of Direction .
+ */
 class UnitGroupItemsByDirection {
     private items: HTMLImageElement[][]
     constructor(upItem: string[], downItem: string[], leftItem: string[], rightItem: string[]) {
@@ -135,14 +151,23 @@ class UnitGroupItemsByDirection {
             this.items.push(newItem)
         }
     }
+
+    /**
+     * Returns an array of images which are an animation as seen from Direction n.
+     * @param n a Direction value
+     * @returns an array of images which are an animation as seen from Direction n.
+     */
     item(n: Direction): HTMLImageElement[] {
         return this.items[n]
     }
 }
 
-// which side the unit is on, the franchise that makes it and sends it to battle
+/** which side the unit is on; the franchise that makes it and sends it to battle */
 type Franchise = "Red" | "Blue"
 
+/**
+ * A direction from which a user may view a Unit's animation.
+ */
 enum Direction {
     Up,
     Down,

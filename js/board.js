@@ -5,7 +5,7 @@ let thereIsDropUnit = false;
 const dropUnitId = "drop-unit";
 let unitCardUnits = [];
 let selectedDropUnit = null;
-// Board on which units live
+/** game Board on which Units live and fight for their Side and travel on Paths of XYCoords. */
 class Board {
     constructor() {
         this._units = null;
@@ -86,7 +86,7 @@ class Board {
         this.ctx.fill();
     }
 }
-// A path of points for units to travel down
+/** A path of points on a Board for Units to travel down */
 class Path {
     // Note: a path is basically an array of [x, y] pairs
     constructor(points) {
@@ -106,6 +106,9 @@ class Path {
         return this.points[this.points.length - 1];
     }
 }
+/**
+ * A game Board coordinate
+ */
 class XYCoord {
     constructor(x, y) {
         this.x = 0;

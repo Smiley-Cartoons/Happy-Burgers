@@ -9,7 +9,7 @@ const dropUnitId = "drop-unit"
 let unitCardUnits: Unit[] = []
 let selectedDropUnit: Unit = null
 
-// Board on which units live
+/** game Board on which Units live and fight for their Side and travel on Paths of XYCoords. */
 class Board {
     canvas: HTMLCanvasElement
     ctx: CanvasRenderingContext2D
@@ -112,7 +112,7 @@ class Board {
     }
 }
 
-// A path of points for units to travel down
+/** A path of points on a Board for Units to travel down */
 class Path {
     points: XYCoord[] = null
     // Note: a path is basically an array of [x, y] pairs
@@ -133,6 +133,9 @@ class Path {
     }
 }
 
+/**
+ * A game Board coordinate
+ */
 class XYCoord {
     x: number = 0
     y: number = 0
