@@ -53,6 +53,7 @@ class Unit {
         }
         else if (this.isFighting) {
             // todo: fight
+            //this.calcDirection(this.x - // todo: get opponent x, this.y - // todo: get opponent y)
         }
         else if (this.doesWantToTravel) { // move towards target position
             this.moveToTargetPosition()
@@ -60,9 +61,14 @@ class Unit {
         }
         else {
             // todo: make the unit be at rest
+            this.currentImage = this.images.atRestImages.item(this.direction)
         }
     }
 
+    /**
+     * Moves this towards this.targetPosition by this.speed per call.
+     * Also auto has this.direction re-calculated
+     */
     moveToTargetPosition(): void {
         let xdis = this.targetPosition.x - this.x
         let ydis = this.targetPosition.y - this.y
@@ -77,13 +83,22 @@ class Unit {
             this.x += xMovement
             this.y += yMovement
 
-            // change direction (down, up, left, right) based on angle
-            let movementAngle = Math.atan2(xdis, -ydis)*180/Math.PI // minus ydis because in html +y is down
-            if (-135 < movementAngle && movementAngle < -45) { this.direction = Direction.Down}
-            else if (-45 < movementAngle && movementAngle < 45) { this.direction = Direction.Left}
-            else if (45 < movementAngle && movementAngle < 135) { this.direction = Direction.Up}
-            else { this.direction = Direction.Right}
+            this.calcDirection(xdis, ydis)
         }
+    }
+
+    /**
+     * Sets this.direction based on where the target is that this should face towards
+     * @param xdis x board distance between this and target it should be facing 
+     * @param ydis y board distance between this and target it should be facing 
+     */
+    calcDirection(xdis: number, ydis: number): void {
+        // change direction (down, up, left, right) based on angle
+        let movementAngle = Math.atan2(xdis, -ydis)*180/Math.PI // minus ydis because in html and on the board +y is down
+        if (-135 < movementAngle && movementAngle < -45) { this.direction = Direction.Down}
+        else if (-45 < movementAngle && movementAngle < 45) { this.direction = Direction.Left}
+        else if (45 < movementAngle && movementAngle < 135) { this.direction = Direction.Up}
+        else { this.direction = Direction.Right}
     }
 
     get doesWantToTravel(): boolean {

@@ -156,7 +156,7 @@ function RenderUnitCards(units: Unit[]): void {
         unitCardUnits.push(unit)
 
         newCard.className = "unit-card"
-        newCard.innerHTML = `<img src="${unit.images.atRestImages.item(Direction.Down).src}">`
+        newCard.innerHTML = `<img src="${unit.images.atRestImages.item(Direction.Down)[0].src}">`
 
         let num = index
         newCard.onclick = (event) => { UnitCardClickEvent(event, newCard.id, num)}
@@ -216,18 +216,15 @@ function StartGame(): void {
     const BlueToRedLeftPath = new Path(RedToBlueLeftPath.points.filter(() => true).reverse())
     const BlueToRedRightPath = new Path(RedToBlueRightPath.points.filter(() => true).reverse())
 
-    let restaurantImages = new UnitImages()
-    restaurantImages.atRestImages = new UnitGroupItemsByDirection(new Image(), new Image(), new Image(), new Image())
-    restaurantImages.atRestImages.item(Direction.Down).src = "images/Restaurant/Restaurant-01.png"
+    let restaurantImages = new UnitImages(new UnitGroupItemsByDirection([""], ["images/Restaurant/Restaurant-01.png"], [""], [""]))
     const RedRestaurant = new Unit(restaurantImages, "Red", 1200, RedTowerPoint.x, RedTowerPoint.y, 30)
     const BlueRestaurant = new Unit(restaurantImages, "Red", 1200, BlueTowerPoint.x, BlueTowerPoint.y, 30)
     
     board._units.push(RedRestaurant)
     board._units.push(BlueRestaurant)
 
-    let images = new UnitImages()
-    images.atRestImages = new UnitGroupItemsByDirection(new Image(), new Image(), new Image(), new Image())
-    images.atRestImages.item(Direction.Down).src = "images/Burger/Burger 01.png"
+    let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], [""], [""]))
+    
     let u1 = new Unit(images, "Blue", 100, 20, 40)
     let u2 = new Unit(images, "Red", 100, 40, 40, 15)
     board._units.push(u1)
