@@ -118,6 +118,11 @@ class XYCoord {
     }
 }
 //###################### SITE FUNCTIONS ######################//
+/**
+ * Adds fixed html elements to the window that allow the user to select a unit a drop a new one of it on the board.
+ * This method is to be called after board init but before board.startGame()
+ * @param units Static units that are cloned to add new units to the board.
+ */
 function RenderUnitCards(units) {
     unitCardUnits = [];
     let index = 0;
@@ -180,11 +185,12 @@ function StartGame() {
     board._units.push(RedRestaurant);
     board._units.push(BlueRestaurant);
     let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], [""], [""]));
-    let u1 = new Unit(images, "Blue", 100, 20, 40);
+    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"], ["pictures", "Doos"], ["hasn't", "made", "yet"]);
+    let u1 = new Unit(images, "Blue", 100, 20, 40, 12);
     let u2 = new Unit(images, "Red", 100, 40, 40, 15);
     board._units.push(u1);
     board._units.push(u2);
-    let units = [...[BlueRestaurant, u1]];
+    let units = [...[BlueRestaurant, u1, u2, u1, BlueRestaurant, u1, u2]];
     RenderUnitCards(units);
     board.startGame();
 }

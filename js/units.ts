@@ -139,10 +139,10 @@ class UnitImages {
  * Divides a UnitImages animation into arrays of images for each value of Direction .
  */
 class UnitGroupItemsByDirection {
-    private items: HTMLImageElement[][]
+    private items: HTMLImageElement[][] = []
     constructor(upItem: string[], downItem: string[], leftItem: string[], rightItem: string[]) {
         for (let item of [upItem, downItem, leftItem, rightItem]) {
-            let newItem: HTMLImageElement[]
+            let newItem: HTMLImageElement[] = []
             for (let src of item) {
                 let newI = new Image()
                 newI.src = src

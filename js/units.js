@@ -125,8 +125,9 @@ class UnitImages {
  */
 class UnitGroupItemsByDirection {
     constructor(upItem, downItem, leftItem, rightItem) {
+        this.items = [];
         for (let item of [upItem, downItem, leftItem, rightItem]) {
-            let newItem;
+            let newItem = [];
             for (let src of item) {
                 let newI = new Image();
                 newI.src = src;
