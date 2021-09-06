@@ -37,18 +37,20 @@ canvas {
     position: fixed;
     bottom: 0;
     width: 100%;
-    height: 120px;
     border-top: solid 2px hsl(47, 100%, 45%);
     background-color: hsl(35, 100%, 35%);
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
+    padding: 2px 15px;
 }
 .unit-card {
-    margin: 0px 2px;
-    min-width: 100px;
+    margin: 2px;
+    min-width: 30px;
     flex-basis: 150px;
+    flex-grow: 1;
+    flex-shrink: 1;
     background-color: hsl(47, 100%, 45%);
     display: grid;
     align-items: center;
@@ -58,7 +60,7 @@ canvas {
     background-color: hsl(47, 100%, 55%);
 }
 .unit-card img {
-    height: 110px;
+    height: min(13vw, 110px);
 }
 .unit-card-selected {
     box-shadow: 0px 0px 8px 4px hsl(180, 100%, 50%);
