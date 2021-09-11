@@ -184,8 +184,8 @@ function StartGame() {
     const BlueRestaurant = new Unit(restaurantImages, "Red", 1200, BlueTowerPoint.x, BlueTowerPoint.y, 30);
     board._units.push(RedRestaurant);
     board._units.push(BlueRestaurant);
-    let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], [""], [""]));
-    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"], ["pictures", "Doos"], ["hasn't", "made", "yet"]);
+    let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], ["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"]));
+    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"], ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"]);
     let u1 = new Unit(images, "Blue", 100, 20, 40, 12);
     let u2 = new Unit(images, "Red", 100, 40, 40, 15);
     board._units.push(u1);
