@@ -11,6 +11,10 @@ class Unit {
     size: number
     health_bar_width: number = 12
     health_bar_height: number = 2
+    img_tick:number = 1
+    img_index:number = 0
+    ticks_per_image:number = 1
+    animationTime:number = 1 // in seconds
     isFighting: boolean = false
     direction: Direction = Direction.Down
 
@@ -60,7 +64,20 @@ class Unit {
         }
         else if (this.doesWantToTravel) { // move towards target position
             this.moveToTargetPosition()
-            // TODO: cycle through movement animation pics
+            let movingImages = this.images.movingImages.item(this.direction)
+            this.ticks_per_image = 1000*(this.animationTime/movingImages.length)/board.millis_per_tick
+            this.img_tick +=1
+
+            if (this.img_tick>this.ticks_per_image){
+                this.img_tick=1
+                this.img_index +=1
+                if (this.img_index >= movingImages.length) {
+                    this.img_index = 0
+                }
+            }
+
+            this.currentImage = movingImages[this.img_index]
+            
         }
         else {
             // todo: make the unit be at rest

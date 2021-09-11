@@ -14,6 +14,10 @@ class Unit {
     constructor(images, side, health, x, y, size = 10) {
         this.health_bar_width = 12;
         this.health_bar_height = 2;
+        this.img_tick = 1;
+        this.img_index = 0;
+        this.ticks_per_image = 1;
+        this.animationTime = 1; // in seconds
         this.isFighting = false;
         this.direction = Direction.Down;
         this.speed = 0;
@@ -45,7 +49,17 @@ class Unit {
         }
         else if (this.doesWantToTravel) { // move towards target position
             this.moveToTargetPosition();
-            // TODO: cycle through movement animation pics
+            let movingImages = this.images.movingImages.item(this.direction);
+            this.ticks_per_image = 1000 * (this.animationTime / movingImages.length) / board.millis_per_tick;
+            this.img_tick += 1;
+            if (this.img_tick > this.ticks_per_image) {
+                this.img_tick = 1;
+                this.img_index += 1;
+                if (this.img_index >= movingImages.length) {
+                    this.img_index = 0;
+                }
+            }
+            this.currentImage = movingImages[this.img_index];
         }
         else {
             // todo: make the unit be at rest
