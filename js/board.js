@@ -7,16 +7,17 @@ let unitCardUnits = [];
 let selectedDropUnit = null;
 /** game Board on which Units live and fight for their Side and travel on Paths of XYCoords. */
 class Board {
-    constructor() {
+    constructor(canvasId = "game_board_element", x_spaces = 100, y_spaces = 120) {
+        /**How far this is pushed down this.canvas (so Units can be rendered at y of zero on this and still show on this.canvas) */
+        this.y_spaces_offset = 10;
         this._units = null;
         this.millis_per_tick = 25;
         this.gameIsOver = false;
-        this.canvas = document.getElementById("game_board_element");
+        this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext("2d");
-        this.x_spaces = 100;
-        this.y_spaces = 120;
+        this.x_spaces = x_spaces;
+        this.y_spaces = y_spaces;
         this._units = [];
-        this.millis_per_tick = 25;
         this.gameIsOver = false;
     }
     // Kicks off game clock ticking cycle
@@ -42,7 +43,7 @@ class Board {
     }
     adjustBoard() {
         let w = document.documentElement.clientWidth;
-        let h = document.documentElement.clientHeight;
+        //let h = document.documentElement.clientHeight
         if (w >= 769) {
             w = 759;
         }
@@ -50,8 +51,8 @@ class Board {
             w -= 10; // margin 5px
         }
         this.space_size = w / this.x_spaces;
-        this.canvas.width = this.space_size * this.x_spaces;
-        this.canvas.height = this.space_size * this.y_spaces;
+        this.canvas.width = this.canvasX(this.x_spaces);
+        this.canvas.height = this.canvasY(this.y_spaces);
     }
     /**
      * Renders a Unit with it's y coordinate being it's bottom edge and it's x coordinate being at it's center.
@@ -59,12 +60,11 @@ class Board {
      * @param unit the Unit that gets drawn on the this.canvas
      */
     renderUnit(unit) {
-        let space_size = this.space_size;
-        let ratio = (unit.currentImage.width / unit.currentImage.height) * space_size;
-        let topLeftX = unit.x * space_size - ratio * unit.size / 2;
-        let topLeftY = unit.y * space_size - ratio * unit.size;
+        let ratio = (unit.currentImage.width / unit.currentImage.height) * this.space_size;
+        let topLeftX = this.canvasX(unit.x) - ratio * unit.size / 2;
+        let topLeftY = this.canvasY(unit.y) - this.space_size * unit.size;
         let width = ratio * unit.size;
-        let height = space_size * unit.size;
+        let height = this.space_size * unit.size;
         this.ctx.drawImage(unit.currentImage, topLeftX, topLeftY, width, height);
         this.renderHealthBar(unit);
     }
@@ -73,11 +73,10 @@ class Board {
      * @param unit the Unit whose health bar gets drawn on this.canvas
      */
     renderHealthBar(unit) {
-        let space_size = this.space_size;
-        let canvasX = unit.x * space_size;
-        let canvasY = unit.y * space_size;
-        let topLeftX = canvasX - unit.health_bar_width * space_size / 2;
-        let topLeftY = canvasY - space_size * (unit.size + unit.health_bar_height);
+        let canvasX = this.canvasX(unit.x);
+        let canvasY = this.canvasY(unit.y);
+        let topLeftX = canvasX - unit.health_bar_width * this.space_size / 2;
+        let topLeftY = canvasY - this.space_size * (unit.size + unit.health_bar_height);
         let width = unit.health_bar_width * unit.health / unit.originalHealth;
         if (width < 0) {
             width = 0;
@@ -85,15 +84,27 @@ class Board {
         if (width > unit.health_bar_width) {
             width = unit.health_bar_width;
         }
-        width *= space_size;
+        width *= this.space_size;
         this.ctx.beginPath();
-        this.ctx.rect(topLeftX, topLeftY, unit.health_bar_width * space_size, unit.health_bar_height * space_size);
+        this.ctx.rect(topLeftX, topLeftY, unit.health_bar_width * this.space_size, unit.health_bar_height * this.space_size);
         this.ctx.fillStyle = "hsl(0, 100%, 60%)";
         this.ctx.fill();
         this.ctx.beginPath();
-        this.ctx.rect(topLeftX, topLeftY, width, unit.health_bar_height * space_size);
+        this.ctx.rect(topLeftX, topLeftY, width, unit.health_bar_height * this.space_size);
         this.ctx.fillStyle = "hsl(130, 100%, 50%)";
         this.ctx.fill();
+    }
+    canvasX(boardX) {
+        return boardX * this.space_size;
+    }
+    canvasY(boardY) {
+        return (boardY + this.y_spaces_offset) * this.space_size;
+    }
+    boardX(canvasX) {
+        return canvasX / this.space_size;
+    }
+    boardY(canvasY) {
+        return canvasY / this.space_size - this.y_spaces_offset;
     }
 }
 /** A path of points on a Board for Units to travel down */
@@ -156,8 +167,8 @@ function UnitCardClickEvent(event, unitCardId, index) {
 function CanvasClickEvent(event) {
     if (selectedDropUnit != null) {
         // calculate where the unit would be on the canvas
-        let mouseBoardX = event.offsetX / board.space_size;
-        let mouseBoardY = event.offsetY / board.space_size;
+        let mouseBoardX = board.boardX(event.offsetX);
+        let mouseBoardY = board.boardY(event.offsetY);
         // drop it there 
         let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.size);
         newUnit = Object.assign(newUnit, selectedDropUnit);
