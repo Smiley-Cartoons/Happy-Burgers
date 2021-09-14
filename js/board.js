@@ -27,9 +27,10 @@ class Board {
     _tick() {
         // Resize canvas
         this.adjustBoard();
+        this._units.sort((u1, u2) => u1.y - u2.y);
         this._units.forEach((unit, index, array) => {
-            unit._tick();
             this.renderUnit(unit);
+            unit._tick();
         });
         // TODO: Verify that game is not over
         if (this.gameIsOver === false) {
@@ -52,22 +53,31 @@ class Board {
         this.canvas.width = this.space_size * this.x_spaces;
         this.canvas.height = this.space_size * this.y_spaces;
     }
+    /**
+     * Renders a Unit with it's y coordinate being it's bottom edge and it's x coordinate being at it's center.
+     * Also renders a health bar for unit.
+     * @param unit the Unit that gets drawn on the this.canvas
+     */
     renderUnit(unit) {
         let space_size = this.space_size;
         let ratio = (unit.currentImage.width / unit.currentImage.height) * space_size;
         let topLeftX = unit.x * space_size - ratio * unit.size / 2;
-        let topLeftY = unit.y * space_size - ratio * unit.size / 2;
+        let topLeftY = unit.y * space_size - ratio * unit.size;
         let width = ratio * unit.size;
         let height = space_size * unit.size;
         this.ctx.drawImage(unit.currentImage, topLeftX, topLeftY, width, height);
-        this.renderHealthBars(unit);
+        this.renderHealthBar(unit);
     }
-    renderHealthBars(unit) {
+    /**
+     * Draws a health bar for a Unit on this.
+     * @param unit the Unit whose health bar gets drawn on this.canvas
+     */
+    renderHealthBar(unit) {
         let space_size = this.space_size;
         let canvasX = unit.x * space_size;
         let canvasY = unit.y * space_size;
         let topLeftX = canvasX - unit.health_bar_width * space_size / 2;
-        let topLeftY = canvasY - space_size * unit.size / 2 - unit.health_bar_height;
+        let topLeftY = canvasY - space_size * (unit.size + unit.health_bar_height);
         let width = unit.health_bar_width * unit.health / unit.originalHealth;
         if (width < 0) {
             width = 0;
