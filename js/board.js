@@ -173,7 +173,7 @@ function CanvasClickEvent(event) {
         let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.size);
         newUnit = Object.assign(newUnit, selectedDropUnit);
         newUnit.x = mouseBoardX;
-        newUnit.y = mouseBoardY;
+        newUnit.y = mouseBoardY + newUnit.size / 2;
         board._units.push(newUnit);
         DeselectUnitCards();
         selectedDropUnit = null;
