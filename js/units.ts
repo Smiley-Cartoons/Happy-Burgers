@@ -179,9 +179,6 @@ class UnitGroupItemsByDirection {
     }
 }
 
-/** which side the unit is on; the franchise that makes it and sends it to battle */
-type Franchise = "Red" | "Blue"
-
 /**
  * A direction from which a user may view a Unit's animation.
  */
