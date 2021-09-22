@@ -44,8 +44,22 @@ class Board {
             setTimeout(this._tick.bind(this), this.millis_per_tick);
         }
         else {
-            // TODO: Add game wrap-up code; congratulate this.winner
+            this.clearAll();
+            this.declareWinner();
         }
+    }
+    /** Congratulates the winning side/Franchise. */
+    declareWinner() {
+        throw new Error("Method not implemented.");
+    }
+    /** Clears the canvas of units and resets the franchises. */
+    clearAll() {
+        this.units = [];
+        this.redFranchise.mainTower = null;
+        this.redFranchise.units = [];
+        this.blueFranchise.mainTower = null;
+        this.blueFranchise.units = [];
+        this.canvas.width = this.canvas.width;
     }
     addUnit(unit, side = null) {
         if (side !== null) {
@@ -235,7 +249,9 @@ function StartGame() {
     let restaurantImages = new UnitImages(new UnitGroupItemsByDirection([""], ["images/Restaurant/Restaurant-01.png"], [""], [""]));
     const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 30);
     const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 30);
+    board.redFranchise.mainTower = RedRestaurant;
     board.addUnit(RedRestaurant);
+    board.blueFranchise.mainTower = BlueRestaurant;
     board.addUnit(BlueRestaurant);
     let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], ["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"]));
     images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"], ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"]);

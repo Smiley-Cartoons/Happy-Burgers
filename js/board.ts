@@ -63,8 +63,24 @@ class Board {
         if (this.gameIsOver === false) {
             setTimeout(this._tick.bind(this), this.millis_per_tick)
         } else {
-            // TODO: Add game wrap-up code; congratulate this.winner
+            this.clearAll()
+            this.declareWinner()
         }
+    }
+
+    /** Congratulates the winning side/Franchise. */
+    declareWinner() { // TODO: Actually implement this method.
+        throw new Error("Method not implemented.")
+    }
+
+    /** Clears the canvas of units and resets the franchises. */
+    clearAll() {
+        this.units = []
+        this.redFranchise.mainTower = null
+        this.redFranchise.units = []
+        this.blueFranchise.mainTower = null
+        this.blueFranchise.units = []
+        this.canvas.width = this.canvas.width
     }
 
     addUnit(unit: Unit, side: Franchise = null) {
@@ -73,7 +89,6 @@ class Board {
             side.units.push(unit)
         }
         this.units.push(unit)
-
     }
 
     checkIfGameIsOver() {
@@ -294,7 +309,9 @@ function StartGame(): void {
     const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 30)
     const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 30)
     
+    board.redFranchise.mainTower = RedRestaurant
     board.addUnit(RedRestaurant)
+    board.blueFranchise.mainTower = BlueRestaurant
     board.addUnit(BlueRestaurant)
 
     let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], ["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"]))

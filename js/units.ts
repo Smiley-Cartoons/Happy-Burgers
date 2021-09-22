@@ -40,7 +40,7 @@ class Unit {
     constructor(images: UnitImages, side: Franchise, health: number, x: number, y: number, size: number = 10) {
         this.images = images
         if (images != null) {
-            this.currentImage = images.atRestImages.item(Direction.Down)[0] // todo: determine which image should be the initial image
+            this.currentImage = images.atRestImages.item(Direction.Down)[0] // TODO: determine which image should be the initial image
         }
         this.side = side
 
@@ -56,11 +56,11 @@ class Unit {
 
     _tick(): void {        
         if (this.health <= 0) {
-            // todo: make the unit die
+            // TODO: make the unit die
         }
         else if (this.isFighting) {
-            // todo: fight
-            //this.calcDirection(this.x - // todo: get opponent x, this.y - // todo: get opponent y)
+            // TODO: fight
+            //this.calcDirection(this.x - // TODO: get opponent x, this.y - // TODO: get opponent y)
         }
         else if (this.doesWantToTravel) { // move towards target position
             this.moveToTargetPosition()
@@ -80,7 +80,7 @@ class Unit {
             
         }
         else {
-            // todo: make the unit be at rest
+            // TODO: make the unit be at rest
             this.currentImage = this.images.atRestImages.item(this.direction)[0]
         }
     }
