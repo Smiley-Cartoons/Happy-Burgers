@@ -3,5 +3,7 @@
         "lib": ["DOM", "DOM.Iterable", "ES2019"],
         "target": "ES6",
         "watch": true
+        // "outDir": "js",
+        // "rootDirs": [".", "ts"]
     }
 }

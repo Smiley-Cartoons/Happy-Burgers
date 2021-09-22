@@ -10,15 +10,21 @@ class Board {
     constructor(canvasId = "game_board_element", x_spaces = 100, y_spaces = 120) {
         /**How far this is pushed down this.canvas (so Units can be rendered at y of zero on this and still show on this.canvas) */
         this.y_spaces_offset = 10;
-        this._units = null;
+        this.units = null;
         this.millis_per_tick = 25;
         this.gameIsOver = false;
+        this.redFranchise = null;
+        this.blueFranchise = null;
+        /** Franchise that won the game. Will be either this.redFranchise or this.blueFranchise */
+        this.winner = null;
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext("2d");
         this.x_spaces = x_spaces;
         this.y_spaces = y_spaces;
-        this._units = [];
+        this.units = [];
         this.gameIsOver = false;
+        this.redFranchise = new Franchise("Red");
+        this.blueFranchise = new Franchise("Blue");
     }
     // Kicks off game clock ticking cycle
     startGame() {
@@ -28,17 +34,50 @@ class Board {
     _tick() {
         // Resize canvas
         this.adjustBoard();
-        this._units.sort((u1, u2) => u1.y - u2.y);
-        this._units.forEach((unit, index, array) => {
+        this.units.sort((u1, u2) => u1.y - u2.y);
+        this.units.forEach((unit, index, array) => {
             this.renderUnit(unit);
             unit._tick();
         });
-        // TODO: Verify that game is not over
+        this.checkIfGameIsOver();
         if (this.gameIsOver === false) {
             setTimeout(this._tick.bind(this), this.millis_per_tick);
         }
         else {
-            // TODO: Add game wrap-up code
+            this.clearAll();
+            this.declareWinner();
+        }
+    }
+    /** Congratulates the winning side/Franchise. */
+    declareWinner() {
+        throw new Error("Method not implemented.");
+    }
+    /** Clears the canvas of units and resets the franchises. */
+    clearAll() {
+        this.units = [];
+        this.redFranchise.mainTower = null;
+        this.redFranchise.units = [];
+        this.blueFranchise.mainTower = null;
+        this.blueFranchise.units = [];
+        this.canvas.width = this.canvas.width;
+    }
+    addUnit(unit, side = null) {
+        if (side !== null) {
+            unit.side = side;
+            side.units.push(unit);
+        }
+        this.units.push(unit);
+    }
+    checkIfGameIsOver() {
+        if (this.redFranchise.mainTower.health <= 0) {
+            this.gameIsOver = true;
+            if (this.blueFranchise.mainTower.health > 0) {
+                this.winner = this.redFranchise;
+            }
+        }
+        else if (this.blueFranchise.mainTower.health <= 0) {
+            this.gameIsOver = true;
+            this.winner = this.blueFranchise;
         }
     }
     adjustBoard() {
@@ -138,6 +177,13 @@ class XYCoord {
         this.y = y;
     }
 }
+/** One of the two sides for which Units fight. Sends it's units to destroy the main tower of the other Franchise. */
+class Franchise {
+    constructor(name) {
+        this.mainTower = null;
+        this.name = name;
+    }
+}
 //###################### SITE FUNCTIONS ######################//
 /**
  * Adds fixed html elements to the window that allow the user to select a unit a drop a new one of it on the board.
@@ -174,7 +220,7 @@ function CanvasClickEvent(event) {
         newUnit = Object.assign(newUnit, selectedDropUnit);
         newUnit.x = mouseBoardX;
         newUnit.y = mouseBoardY + newUnit.size / 2;
-        board._units.push(newUnit);
+        board.addUnit(newUnit);
         DeselectUnitCards();
         selectedDropUnit = null;
     }
@@ -201,16 +247,18 @@ function StartGame() {
     const BlueToRedLeftPath = new Path(RedToBlueLeftPath.points.filter(() => true).reverse());
     const BlueToRedRightPath = new Path(RedToBlueRightPath.points.filter(() => true).reverse());
     let restaurantImages = new UnitImages(new UnitGroupItemsByDirection([""], ["images/Restaurant/Restaurant-01.png"], [""], [""]));
-    const RedRestaurant = new Unit(restaurantImages, "Red", 1200, RedTowerPoint.x, RedTowerPoint.y, 30);
-    const BlueRestaurant = new Unit(restaurantImages, "Red", 1200, BlueTowerPoint.x, BlueTowerPoint.y, 30);
-    board._units.push(RedRestaurant);
-    board._units.push(BlueRestaurant);
+    const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 30);
+    const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 30);
+    board.redFranchise.mainTower = RedRestaurant;
+    board.addUnit(RedRestaurant);
+    board.blueFranchise.mainTower = BlueRestaurant;
+    board.addUnit(BlueRestaurant);
     let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], ["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"]));
     images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"], ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"]);
-    let u1 = new Unit(images, "Blue", 100, 20, 40, 12);
-    let u2 = new Unit(images, "Red", 100, 40, 40, 15);
-    board._units.push(u1);
-    board._units.push(u2);
+    let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 12);
+    let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 15);
+    board.addUnit(u1);
+    board.addUnit(u2);
     let units = [...[BlueRestaurant, u1, u2, u1, BlueRestaurant, u1, u2]];
     RenderUnitCards(units);
     board.startGame();
