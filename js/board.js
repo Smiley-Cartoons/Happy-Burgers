@@ -11,7 +11,6 @@ class Board {
         /**How far this is pushed down this.canvas (so Units can be rendered at y of zero on this and still show on this.canvas) */
         this.y_spaces_offset = 10;
         this.units = null;
-        this.millis_per_tick = 25;
         this.gameIsOver = false;
         this.redFranchise = null;
         this.blueFranchise = null;
@@ -28,12 +27,14 @@ class Board {
     }
     // Kicks off game clock ticking cycle
     startGame() {
-        setTimeout(this._tick.bind(this), this.millis_per_tick);
+        setTimeout(this._tick.bind(this), Board.millis_per_tick);
     }
     // Adjusts units for the current clock tick
     _tick() {
         // Resize canvas
         this.adjustBoard();
+        this.redFranchise._tick();
+        this.blueFranchise._tick();
         this.units.sort((u1, u2) => u1.y - u2.y);
         this.units.forEach((unit, index, array) => {
             this.renderUnit(unit);
@@ -41,7 +42,7 @@ class Board {
         });
         this.checkIfGameIsOver();
         if (this.gameIsOver === false) {
-            setTimeout(this._tick.bind(this), this.millis_per_tick);
+            setTimeout(this._tick.bind(this), Board.millis_per_tick);
         }
         else {
             this.clearAll();
@@ -146,6 +147,7 @@ class Board {
         return canvasY / this.space_size - this.y_spaces_offset;
     }
 }
+Board.millis_per_tick = 25;
 /** A path of points on a Board for Units to travel down */
 class Path {
     // Note: a path is basically an array of [x, y] pairs
@@ -181,9 +183,25 @@ class XYCoord {
 class Franchise {
     constructor(name) {
         this.mainTower = null;
+        /**Includes this.mainTower */
+        this.units = [];
+        this.grease = 0;
+        this.grease_tick = 0;
         this.name = name;
     }
+    _tick() {
+        this.grease_tick++;
+        if (this.grease_tick > Franchise.grease_ticks_per_sec) {
+            this.grease_tick = 0;
+            if (this.grease < Franchise.max_grease) {
+                this.grease++;
+            }
+        }
+    }
 }
+Franchise.max_grease = 12;
+Franchise.grease_per_sec = 1;
+Franchise.grease_ticks_per_sec = Franchise.grease_per_sec * 1000 / Board.millis_per_tick;
 //###################### SITE FUNCTIONS ######################//
 /**
  * Adds fixed html elements to the window that allow the user to select a unit a drop a new one of it on the board.

@@ -19,7 +19,7 @@ class Board {
     y_spaces_offset: number = 10
     space_size: number
     private units: Unit[] = null
-    readonly millis_per_tick = 25
+    static readonly millis_per_tick = 25
     gameIsOver = false
 
     redFranchise: Franchise = null
@@ -43,13 +43,16 @@ class Board {
 
     // Kicks off game clock ticking cycle
     startGame() {
-        setTimeout(this._tick.bind(this), this.millis_per_tick)
+        setTimeout(this._tick.bind(this), Board.millis_per_tick)
     }
 
     // Adjusts units for the current clock tick
     _tick() {
         // Resize canvas
         this.adjustBoard()
+
+        this.redFranchise._tick()
+        this.blueFranchise._tick()
 
         this.units.sort((u1, u2) => u1.y - u2.y)
 
@@ -61,7 +64,7 @@ class Board {
         this.checkIfGameIsOver()
 
         if (this.gameIsOver === false) {
-            setTimeout(this._tick.bind(this), this.millis_per_tick)
+            setTimeout(this._tick.bind(this), Board.millis_per_tick)
         } else {
             this.clearAll()
             this.declareWinner()
@@ -220,9 +223,24 @@ class Franchise {
     name: string
     mainTower: Unit = null
     /**Includes this.mainTower */
-    units: Unit[]
+    units: Unit[] = []
+    grease: number = 0
+    static readonly max_grease = 12
+    static readonly grease_per_sec = 1
+    grease_tick: number = 0
+    static grease_ticks_per_sec: number = Franchise.grease_per_sec * 1000 / Board.millis_per_tick
     constructor(name: string) {
         this.name = name
+    }
+
+    _tick(): void {
+        this.grease_tick++
+        if (this.grease_tick > Franchise.grease_ticks_per_sec) {
+            this.grease_tick = 0
+            if (this.grease < Franchise.max_grease) {
+                this.grease++
+            }
+        }
     }
 }
 

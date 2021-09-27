@@ -50,7 +50,7 @@ class Unit {
         else if (this.doesWantToTravel) { // move towards target position
             this.moveToTargetPosition();
             let movingImages = this.images.movingImages.item(this.direction);
-            this.ticks_per_image = 1000 * (this.animationTime / movingImages.length) / board.millis_per_tick;
+            this.ticks_per_image = 1000 * (this.animationTime / movingImages.length) / Board.millis_per_tick; // TODO: refactor: move equations so they're not calculated every frame?
             this.img_tick += 1;
             if (this.img_tick > this.ticks_per_image) {
                 this.img_tick = 1;

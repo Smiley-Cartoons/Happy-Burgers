@@ -42,6 +42,7 @@ footer {
     bottom: 0;
     width: 100%;
     height: 20vw;
+    padding-bottom: min(0.3vw, 3px);
     max-height: var(--menu-height);
     border-top: solid 2px hsl(47, 100%, 45%);
     background-color: hsl(35, 100%, 35%);
