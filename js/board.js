@@ -9,7 +9,7 @@ let selectedDropUnit = null;
 class Board {
     constructor(canvasId = "game_board_element", x_spaces = 100, y_spaces = 120) {
         /**How far this is pushed down this.canvas (so Units can be rendered at y of zero on this and still show on this.canvas) */
-        this.y_spaces_offset = 10;
+        this.y_spaces_offset = 15;
         this.units = null;
         this.gameIsOver = false;
         /**AI or opponent's side */
@@ -37,6 +37,7 @@ class Board {
         this.adjustBoard();
         this.redFranchise._tick();
         this.blueFranchise._tick();
+        this.renderGreaseBarFill();
         this.units.sort((u1, u2) => u1.y - u2.y);
         this.units.forEach((unit, index, array) => {
             this.renderUnit(unit);
@@ -136,6 +137,10 @@ class Board {
         this.ctx.fillStyle = "hsl(130, 100%, 50%)";
         this.ctx.fill();
     }
+    renderGreaseBarFill() {
+        const fill = document.getElementById("grease-bar-fill");
+        fill.style.width = `${this.blueFranchise.grease * 100 / Franchise.max_grease}%`;
+    }
     canvasX(boardX) {
         return boardX * this.space_size;
     }
@@ -233,16 +238,18 @@ function UnitCardClickEvent(event, unitCardId, index) {
     document.getElementById(unitCardId).classList.add("unit-card-selected");
 }
 function CanvasClickEvent(event) {
-    if (selectedDropUnit != null) {
+    if (selectedDropUnit != null &&
+        selectedDropUnit.side.grease >= selectedDropUnit.grease_cost) { // TODO: Don't allow user to drop unit outside of their zone
         // calculate where the unit would be on the canvas
         let mouseBoardX = board.boardX(event.offsetX);
         let mouseBoardY = board.boardY(event.offsetY);
         // drop it there 
-        let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.size);
+        let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.grease_cost);
         newUnit = Object.assign(newUnit, selectedDropUnit);
         newUnit.x = mouseBoardX;
         newUnit.y = mouseBoardY + newUnit.size / 2;
         board.addUnit(newUnit);
+        selectedDropUnit.side.grease -= selectedDropUnit.grease_cost;
         DeselectUnitCards();
         selectedDropUnit = null;
     }
@@ -278,7 +285,7 @@ function StartGame() {
     let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], ["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"]));
     images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"], ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"]);
     let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12);
-    let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 2, 15);
+    let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 3, 15);
     board.addUnit(u1);
     board.addUnit(u2);
     let units = [...[BlueRestaurant, u1, u2, u1, BlueRestaurant, u1, u2]];

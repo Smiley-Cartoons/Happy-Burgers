@@ -51,24 +51,24 @@ footer {
 }
 .grease-bar {
     position: relative;
-    margin: 5px 12px 1px;
-    width: 97%;
-    border: solid 6px hsl(50, 100%, 50%);
-    border-radius: 6px;
+    margin: min(5px, 1vw) min(12px, 2vw) 1px;
+    width: calc(100vw - min(24px, 4vw));
+    border: solid min(6px, 0.8vw) hsl(50, 100%, 50%);
+    border-radius: min(5px, 0.7vw);
     background-color: black;
 }
 .grease-bar p {
     position: absolute;
-    top: -1rem;
+    margin: 0;
     background-color: hsl(290, 40%, 60%);
     width: 70%;
     height: 100%;
 }
 .grease-bar img {
-    height: 38px;
+    height: min(38px, 5vw);
     position: absolute;
-    left: 96%;
-    top: -10px;
+    right: -4px;
+    top: max(-10px, -1.4vw);
     border: solid 3px hsl(47, 100%, 45%);
     border-radius: 12px;
 }
@@ -78,7 +78,8 @@ footer {
     flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    padding: 2px 15px;
+    max-width: 100vw;
+    padding: 2px min(15px, 2vw);
 }
 .unit-card {
     margin: 2px;
