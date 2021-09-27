@@ -12,7 +12,9 @@ class Board {
         this.y_spaces_offset = 10;
         this.units = null;
         this.gameIsOver = false;
+        /**AI or opponent's side */
         this.redFranchise = null;
+        /**User's side */
         this.blueFranchise = null;
         /** Franchise that won the game. Will be either this.redFranchise or this.blueFranchise */
         this.winner = null;
@@ -185,6 +187,7 @@ class Franchise {
         this.mainTower = null;
         /**Includes this.mainTower */
         this.units = [];
+        /**The currency/material this must have enough of to spawn a new Unit */
         this.grease = 0;
         this.grease_tick = 0;
         this.name = name;
@@ -200,6 +203,7 @@ class Franchise {
     }
 }
 Franchise.max_grease = 12;
+/**How much grease this generates every second, ie how often this.grease += 1 */
 Franchise.grease_per_sec = 1;
 Franchise.grease_ticks_per_sec = Franchise.grease_per_sec * 1000 / Board.millis_per_tick;
 //###################### SITE FUNCTIONS ######################//
@@ -265,16 +269,16 @@ function StartGame() {
     const BlueToRedLeftPath = new Path(RedToBlueLeftPath.points.filter(() => true).reverse());
     const BlueToRedRightPath = new Path(RedToBlueRightPath.points.filter(() => true).reverse());
     let restaurantImages = new UnitImages(new UnitGroupItemsByDirection([""], ["images/Restaurant/Restaurant-01.png"], [""], [""]));
-    const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 30);
-    const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 30);
+    const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 9, 30);
+    const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 9, 30);
     board.redFranchise.mainTower = RedRestaurant;
     board.addUnit(RedRestaurant);
     board.blueFranchise.mainTower = BlueRestaurant;
     board.addUnit(BlueRestaurant);
     let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], ["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"]));
     images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"], ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"]);
-    let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 12);
-    let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 15);
+    let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12);
+    let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 2, 15);
     board.addUnit(u1);
     board.addUnit(u2);
     let units = [...[BlueRestaurant, u1, u2, u1, BlueRestaurant, u1, u2]];

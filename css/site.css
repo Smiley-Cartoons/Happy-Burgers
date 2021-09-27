@@ -50,10 +50,27 @@ footer {
     grid-template-rows: 25% 75%;
 }
 .grease-bar {
-    margin: 3px 12px;
+    position: relative;
+    margin: 5px 12px 1px;
+    width: 97%;
     border: solid 6px hsl(50, 100%, 50%);
     border-radius: 6px;
     background-color: black;
+}
+.grease-bar p {
+    position: absolute;
+    top: -1rem;
+    background-color: hsl(290, 40%, 60%);
+    width: 70%;
+    height: 100%;
+}
+.grease-bar img {
+    height: 38px;
+    position: absolute;
+    left: 96%;
+    top: -10px;
+    border: solid 3px hsl(47, 100%, 45%);
+    border-radius: 12px;
 }
 
 .unit-card-container {
