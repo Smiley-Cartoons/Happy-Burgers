@@ -9,9 +9,10 @@ class Unit {
      * @param  {number} health
      * @param  {number} x board x coordinate
      * @param  {number} y board y coordinate
+     * @param  {number} grease_cost how much grease it costs this.side to spawn this
      * @param  {number=10} size diameter of unit in board spaces
      */
-    constructor(images, side, health, x, y, size = 10) {
+    constructor(images, side, health, x, y, grease_cost, size = 10) {
         this.health_bar_width = 12;
         this.health_bar_height = 2;
         this.img_tick = 1;
@@ -31,6 +32,7 @@ class Unit {
             this.currentImage = images.atRestImages.item(Direction.Down)[0]; // TODO: determine which image should be the initial image
         }
         this.side = side;
+        this.grease_cost = grease_cost;
         this.originalHealth = health;
         this.health = health;
         this.x = x;
@@ -50,7 +52,7 @@ class Unit {
         else if (this.doesWantToTravel) { // move towards target position
             this.moveToTargetPosition();
             let movingImages = this.images.movingImages.item(this.direction);
-            this.ticks_per_image = 1000 * (this.animationTime / movingImages.length) / board.millis_per_tick;
+            this.ticks_per_image = 1000 * (this.animationTime / movingImages.length) / Board.millis_per_tick; // TODO: refactor: move equations so they're not calculated every frame?
             this.img_tick += 1;
             if (this.img_tick > this.ticks_per_image) {
                 this.img_tick = 1;

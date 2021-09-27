@@ -1,3 +1,7 @@
+:root {
+    --menu-height: 150px;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -29,21 +33,53 @@ h1 {
 
 canvas {
     margin: 5px;
-    margin-bottom: 120px;
+    margin-bottom: var(--menu-height);
     background-color: hsl(130, 100%, 25%);
 }
 
-.unit-card-container {
+footer {
     position: fixed;
     bottom: 0;
     width: 100%;
+    height: 20vw;
+    padding-bottom: min(0.3vw, 3px);
+    max-height: var(--menu-height);
     border-top: solid 2px hsl(47, 100%, 45%);
     background-color: hsl(35, 100%, 35%);
+    display: grid;
+    grid-template-rows: 25% 75%;
+}
+.grease-bar {
+    position: relative;
+    margin: min(5px, 1vw) min(12px, 2vw) 1px;
+    width: calc(100vw - min(24px, 4vw));
+    border: solid min(6px, 0.8vw) hsl(50, 100%, 50%);
+    border-radius: min(5px, 0.7vw);
+    background-color: black;
+}
+.grease-bar p {
+    position: absolute;
+    margin: 0;
+    background-color: hsl(290, 40%, 60%);
+    width: 70%;
+    height: 100%;
+}
+.grease-bar img {
+    height: min(38px, 5vw);
+    position: absolute;
+    right: -4px;
+    top: max(-10px, -1.4vw);
+    border: solid 3px hsl(47, 100%, 45%);
+    border-radius: 12px;
+}
+
+.unit-card-container {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    padding: 2px 15px;
+    max-width: 100vw;
+    padding: 2px min(15px, 2vw);
 }
 .unit-card {
     margin: 2px;
@@ -60,7 +96,7 @@ canvas {
     background-color: hsl(47, 100%, 55%);
 }
 .unit-card img {
-    height: min(13vw, 110px);
+    height: min(13vw, 100px);
 }
 .unit-card-selected {
     box-shadow: 0px 0px 8px 4px hsl(180, 100%, 50%);
@@ -68,6 +104,6 @@ canvas {
 
 @media screen and (min-width: 769px) {
     canvas {
-        margin: 5px calc(50% - 379.5px) 120px;
+        margin: 5px calc(50% - 379.5px) var(--menu-height);
     }
 }

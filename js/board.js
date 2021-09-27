@@ -9,11 +9,12 @@ let selectedDropUnit = null;
 class Board {
     constructor(canvasId = "game_board_element", x_spaces = 100, y_spaces = 120) {
         /**How far this is pushed down this.canvas (so Units can be rendered at y of zero on this and still show on this.canvas) */
-        this.y_spaces_offset = 10;
+        this.y_spaces_offset = 15;
         this.units = null;
-        this.millis_per_tick = 25;
         this.gameIsOver = false;
+        /**AI or opponent's side */
         this.redFranchise = null;
+        /**User's side */
         this.blueFranchise = null;
         /** Franchise that won the game. Will be either this.redFranchise or this.blueFranchise */
         this.winner = null;
@@ -28,12 +29,15 @@ class Board {
     }
     // Kicks off game clock ticking cycle
     startGame() {
-        setTimeout(this._tick.bind(this), this.millis_per_tick);
+        setTimeout(this._tick.bind(this), Board.millis_per_tick);
     }
     // Adjusts units for the current clock tick
     _tick() {
         // Resize canvas
         this.adjustBoard();
+        this.redFranchise._tick();
+        this.blueFranchise._tick();
+        this.renderGreaseBarFill();
         this.units.sort((u1, u2) => u1.y - u2.y);
         this.units.forEach((unit, index, array) => {
             this.renderUnit(unit);
@@ -41,7 +45,7 @@ class Board {
         });
         this.checkIfGameIsOver();
         if (this.gameIsOver === false) {
-            setTimeout(this._tick.bind(this), this.millis_per_tick);
+            setTimeout(this._tick.bind(this), Board.millis_per_tick);
         }
         else {
             this.clearAll();
@@ -133,6 +137,10 @@ class Board {
         this.ctx.fillStyle = "hsl(130, 100%, 50%)";
         this.ctx.fill();
     }
+    renderGreaseBarFill() {
+        const fill = document.getElementById("grease-bar-fill");
+        fill.style.width = `${this.blueFranchise.grease * 100 / Franchise.max_grease}%`;
+    }
     canvasX(boardX) {
         return boardX * this.space_size;
     }
@@ -146,6 +154,7 @@ class Board {
         return canvasY / this.space_size - this.y_spaces_offset;
     }
 }
+Board.millis_per_tick = 25;
 /** A path of points on a Board for Units to travel down */
 class Path {
     // Note: a path is basically an array of [x, y] pairs
@@ -181,9 +190,27 @@ class XYCoord {
 class Franchise {
     constructor(name) {
         this.mainTower = null;
+        /**Includes this.mainTower */
+        this.units = [];
+        /**The currency/material this must have enough of to spawn a new Unit */
+        this.grease = 0;
+        this.grease_tick = 0;
         this.name = name;
     }
+    _tick() {
+        this.grease_tick++;
+        if (this.grease_tick > Franchise.grease_ticks_per_sec) {
+            this.grease_tick = 0;
+            if (this.grease < Franchise.max_grease) {
+                this.grease++;
+            }
+        }
+    }
 }
+Franchise.max_grease = 12;
+/**How much grease this generates every second, ie how often this.grease += 1 */
+Franchise.grease_per_sec = 1;
+Franchise.grease_ticks_per_sec = Franchise.grease_per_sec * 1000 / Board.millis_per_tick;
 //###################### SITE FUNCTIONS ######################//
 /**
  * Adds fixed html elements to the window that allow the user to select a unit a drop a new one of it on the board.
@@ -211,16 +238,18 @@ function UnitCardClickEvent(event, unitCardId, index) {
     document.getElementById(unitCardId).classList.add("unit-card-selected");
 }
 function CanvasClickEvent(event) {
-    if (selectedDropUnit != null) {
+    if (selectedDropUnit != null &&
+        selectedDropUnit.side.grease >= selectedDropUnit.grease_cost) { // TODO: Don't allow user to drop unit outside of their zone
         // calculate where the unit would be on the canvas
         let mouseBoardX = board.boardX(event.offsetX);
         let mouseBoardY = board.boardY(event.offsetY);
         // drop it there 
-        let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.size);
+        let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.grease_cost);
         newUnit = Object.assign(newUnit, selectedDropUnit);
         newUnit.x = mouseBoardX;
         newUnit.y = mouseBoardY + newUnit.size / 2;
         board.addUnit(newUnit);
+        selectedDropUnit.side.grease -= selectedDropUnit.grease_cost;
         DeselectUnitCards();
         selectedDropUnit = null;
     }
@@ -247,16 +276,16 @@ function StartGame() {
     const BlueToRedLeftPath = new Path(RedToBlueLeftPath.points.filter(() => true).reverse());
     const BlueToRedRightPath = new Path(RedToBlueRightPath.points.filter(() => true).reverse());
     let restaurantImages = new UnitImages(new UnitGroupItemsByDirection([""], ["images/Restaurant/Restaurant-01.png"], [""], [""]));
-    const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 30);
-    const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 30);
+    const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 9, 30);
+    const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 9, 30);
     board.redFranchise.mainTower = RedRestaurant;
     board.addUnit(RedRestaurant);
     board.blueFranchise.mainTower = BlueRestaurant;
     board.addUnit(BlueRestaurant);
     let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], ["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"]));
     images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"], ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"]);
-    let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 12);
-    let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 15);
+    let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12);
+    let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 3, 15);
     board.addUnit(u1);
     board.addUnit(u2);
     let units = [...[BlueRestaurant, u1, u2, u1, BlueRestaurant, u1, u2]];

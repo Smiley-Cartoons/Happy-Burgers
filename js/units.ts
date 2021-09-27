@@ -11,14 +11,16 @@ class Unit {
     size: number
     health_bar_width: number = 12
     health_bar_height: number = 2
-    img_tick:number = 1
-    img_index:number = 0
+    private img_tick:number = 1
+    private img_index:number = 0
     ticks_per_image:number = 1
     animationTime:number = 1 // in seconds
     isFighting: boolean = false
     direction: Direction = Direction.Down
 
     side: Franchise
+    /**how much grease it costs this.side to spawn this */
+    grease_cost: number
     originalHealth: number
     health: number
     speed: number = 0
@@ -35,14 +37,17 @@ class Unit {
      * @param  {number} health
      * @param  {number} x board x coordinate
      * @param  {number} y board y coordinate
+     * @param  {number} grease_cost how much grease it costs this.side to spawn this
      * @param  {number=10} size diameter of unit in board spaces
      */
-    constructor(images: UnitImages, side: Franchise, health: number, x: number, y: number, size: number = 10) {
+    constructor(images: UnitImages, side: Franchise, health: number, x: number, y: number, grease_cost: number, size: number = 10) {
         this.images = images
         if (images != null) {
             this.currentImage = images.atRestImages.item(Direction.Down)[0] // TODO: determine which image should be the initial image
         }
         this.side = side
+
+        this.grease_cost = grease_cost
 
         this.originalHealth = health
         this.health = health
@@ -65,7 +70,7 @@ class Unit {
         else if (this.doesWantToTravel) { // move towards target position
             this.moveToTargetPosition()
             let movingImages = this.images.movingImages.item(this.direction)
-            this.ticks_per_image = 1000*(this.animationTime/movingImages.length)/board.millis_per_tick
+            this.ticks_per_image = 1000*(this.animationTime/movingImages.length) / Board.millis_per_tick // TODO: refactor: move equations so they're not calculated every frame?
             this.img_tick +=1
 
             if (this.img_tick>this.ticks_per_image){

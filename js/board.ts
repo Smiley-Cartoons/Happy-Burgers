@@ -16,13 +16,15 @@ class Board {
     x_spaces: number
     y_spaces: number
     /**How far this is pushed down this.canvas (so Units can be rendered at y of zero on this and still show on this.canvas) */
-    y_spaces_offset: number = 10
+    y_spaces_offset: number = 15
     space_size: number
     private units: Unit[] = null
-    readonly millis_per_tick = 25
+    static readonly millis_per_tick = 25
     gameIsOver = false
 
+    /**AI or opponent's side */
     redFranchise: Franchise = null
+    /**User's side */
     blueFranchise: Franchise = null
     /** Franchise that won the game. Will be either this.redFranchise or this.blueFranchise */
     winner: Franchise = null
@@ -43,13 +45,17 @@ class Board {
 
     // Kicks off game clock ticking cycle
     startGame() {
-        setTimeout(this._tick.bind(this), this.millis_per_tick)
+        setTimeout(this._tick.bind(this), Board.millis_per_tick)
     }
 
     // Adjusts units for the current clock tick
     _tick() {
         // Resize canvas
         this.adjustBoard()
+
+        this.redFranchise._tick()
+        this.blueFranchise._tick()
+        this.renderGreaseBarFill()
 
         this.units.sort((u1, u2) => u1.y - u2.y)
 
@@ -61,7 +67,7 @@ class Board {
         this.checkIfGameIsOver()
 
         if (this.gameIsOver === false) {
-            setTimeout(this._tick.bind(this), this.millis_per_tick)
+            setTimeout(this._tick.bind(this), Board.millis_per_tick)
         } else {
             this.clearAll()
             this.declareWinner()
@@ -168,6 +174,11 @@ class Board {
         this.ctx.fill()
     }
 
+    renderGreaseBarFill(): void {
+        const fill = document.getElementById("grease-bar-fill")
+        fill.style.width = `${this.blueFranchise.grease*100/Franchise.max_grease}%`
+    }
+
     canvasX(boardX: number): number {
         return boardX * this.space_size
     }
@@ -220,9 +231,26 @@ class Franchise {
     name: string
     mainTower: Unit = null
     /**Includes this.mainTower */
-    units: Unit[]
+    units: Unit[] = []
+    /**The currency/material this must have enough of to spawn a new Unit */
+    grease: number = 0
+    static readonly max_grease = 12
+    /**How much grease this generates every second, ie how often this.grease += 1 */
+    static readonly grease_per_sec = 1
+    private grease_tick: number = 0
+    static grease_ticks_per_sec: number = Franchise.grease_per_sec * 1000 / Board.millis_per_tick
     constructor(name: string) {
         this.name = name
+    }
+
+    _tick(): void {
+        this.grease_tick++
+        if (this.grease_tick > Franchise.grease_ticks_per_sec) {
+            this.grease_tick = 0
+            if (this.grease < Franchise.max_grease) {
+                this.grease++
+            }
+        }
     }
 }
 
@@ -262,16 +290,19 @@ function UnitCardClickEvent(event: MouseEvent, unitCardId: string, index: number
 }
 
 function CanvasClickEvent(event: MouseEvent): void {
-    if (selectedDropUnit != null) {
+    if (selectedDropUnit != null && 
+        selectedDropUnit.side.grease >= selectedDropUnit.grease_cost) { // TODO: Don't allow user to drop unit outside of their zone
         // calculate where the unit would be on the canvas
         let mouseBoardX = board.boardX(event.offsetX)
         let mouseBoardY = board.boardY(event.offsetY)
         // drop it there 
-        let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.size)        
+        let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.grease_cost)        
         newUnit = Object.assign(newUnit, selectedDropUnit)
         newUnit.x = mouseBoardX
         newUnit.y = mouseBoardY + newUnit.size/2
         board.addUnit(newUnit)
+
+        selectedDropUnit.side.grease -= selectedDropUnit.grease_cost
         
         DeselectUnitCards()
         selectedDropUnit = null
@@ -306,8 +337,8 @@ function StartGame(): void {
     const BlueToRedRightPath = new Path(RedToBlueRightPath.points.filter(() => true).reverse())
 
     let restaurantImages = new UnitImages(new UnitGroupItemsByDirection([""], ["images/Restaurant/Restaurant-01.png"], [""], [""]))
-    const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 30)
-    const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 30)
+    const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 9, 30)
+    const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 9, 30)
     
     board.redFranchise.mainTower = RedRestaurant
     board.addUnit(RedRestaurant)
@@ -320,8 +351,8 @@ function StartGame(): void {
                                                         ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], 
                                                         ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"])
 
-    let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 12)
-    let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 15)
+    let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12)
+    let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 3, 15)
     board.addUnit(u1)
     board.addUnit(u2)
 
