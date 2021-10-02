@@ -16,6 +16,8 @@ class Board {
         this.redFranchise = null;
         /**User's side */
         this.blueFranchise = null;
+        /**What percent of this.y_spaces away from the back edge of the user's side of this the user may drop a new Unit. */
+        this.usersPercentOfBoard = 50;
         /** Franchise that won the game. Will be either this.redFranchise or this.blueFranchise */
         this.winner = null;
         this.canvas = document.getElementById(canvasId);
@@ -236,13 +238,18 @@ function UnitCardClickEvent(event, unitCardId, index) {
     selectedDropUnit = Object.assign({}, unitCardUnits[index]);
     DeselectUnitCards();
     document.getElementById(unitCardId).classList.add("unit-card-selected");
+    // TODO: If selectedDropUnit isn't a spell, display where the user can't drop it with a big transulcent red area
 }
 function CanvasClickEvent(event) {
     if (selectedDropUnit != null &&
-        selectedDropUnit.side.grease >= selectedDropUnit.grease_cost) { // TODO: Don't allow user to drop unit outside of their zone
+        selectedDropUnit.side.grease >= selectedDropUnit.grease_cost) {
         // calculate where the unit would be on the canvas
         let mouseBoardX = board.boardX(event.offsetX);
         let mouseBoardY = board.boardY(event.offsetY);
+        if (userMayDrop(selectedDropUnit, mouseBoardX, mouseBoardY) == false) {
+            return;
+        }
+        //TODO: Remove red zone over the area where the user may not drop a new unit
         // drop it there 
         let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.grease_cost);
         newUnit = Object.assign(newUnit, selectedDropUnit);
@@ -253,6 +260,9 @@ function CanvasClickEvent(event) {
         DeselectUnitCards();
         selectedDropUnit = null;
     }
+}
+function userMayDrop(selectedDropUnit, boardX, boardY) {
+    return boardY > (1 - board.usersPercentOfBoard / 100) * board.y_spaces;
 }
 function DeselectUnitCards() {
     for (let unitCard of unitCardContainer.children) {
@@ -283,7 +293,7 @@ function StartGame() {
     board.blueFranchise.mainTower = BlueRestaurant;
     board.addUnit(BlueRestaurant);
     let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], ["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"]));
-    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"], ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"]);
+    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-02.png", "images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 01.png", "images/Burger/Burger 03.png"], ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-02.png", "images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png"], ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 01.png", "images/Burger/Burger 03.png"]);
     let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12);
     let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 3, 15);
     board.addUnit(u1);
