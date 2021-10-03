@@ -9,6 +9,8 @@ const dropUnitId = "drop-unit"
 let unitCardUnits: Unit[] = []
 let selectedDropUnit: Unit = null
 
+type healthBarInfoTuple = [XYCoord, Unit]
+
 /** game Board on which Units live and fight for their Side and travel on Paths of XYCoords. */
 class Board {
     canvas: HTMLCanvasElement
@@ -19,6 +21,7 @@ class Board {
     y_spaces_offset: number = 15
     space_size: number
     private units: Unit[] = null
+    private healthBarsToRenderAtXY: healthBarInfoTuple[] = []
     static readonly millis_per_tick = 25
     gameIsOver = false
 
@@ -26,6 +29,9 @@ class Board {
     redFranchise: Franchise = null
     /**User's side */
     blueFranchise: Franchise = null
+    /**What percent of this.y_spaces away from the back edge of the user's side of this the user may drop a new Unit. */
+    readonly usersPercentOfBoard = 50
+    showNoDropZone: boolean = false
     /** Franchise that won the game. Will be either this.redFranchise or this.blueFranchise */
     winner: Franchise = null
 
@@ -57,11 +63,21 @@ class Board {
         this.blueFranchise._tick()
         this.renderGreaseBarFill()
 
+        if (this.showNoDropZone) {
+            this.renderNoDropZone()
+        }
+
         this.units.sort((u1, u2) => u1.y - u2.y)
+        this.healthBarsToRenderAtXY = []
 
         this.units.forEach((unit, index, array) => {
             this.renderUnit(unit)
+            this.healthBarsToRenderAtXY.push([new XYCoord(unit.x, unit.y), unit])
             unit._tick()
+        })
+
+        this.healthBarsToRenderAtXY.forEach((bar) => {
+            this.renderHealthBar(bar[0], bar[1])
         })
         
         this.checkIfGameIsOver()
@@ -72,6 +88,19 @@ class Board {
             this.clearAll()
             this.declareWinner()
         }
+    }
+
+    /**Draws over the background a red, translucent sheet to show the zone where the user may not drop a new Unit. */
+    renderNoDropZone() {
+        this.ctx.beginPath()
+        this.ctx.rect(this.canvasX(0), this.canvasY(0),
+                      this.x_spaces*this.space_size, 
+                      this.y_spaces*this.space_size * (1- this.usersPercentOfBoard/100))
+
+        this.ctx.fillStyle = "hsla(0, 100%, 60%, 45%)"
+        this.ctx.fill()
+        this.ctx.strokeStyle = "hsl(0, 100%, 60%)"
+        this.ctx.stroke()
     }
 
     /** Congratulates the winning side/Franchise. */
@@ -126,7 +155,7 @@ class Board {
 
     /**
      * Renders a Unit with it's y coordinate being it's bottom edge and it's x coordinate being at it's center.
-     * Also renders a health bar for unit.
+     * Does not render a health bar for unit.
      * @param unit the Unit that gets drawn on the this.canvas
      */
     renderUnit(unit: Unit) {
@@ -139,17 +168,15 @@ class Board {
         this.ctx.drawImage(unit.currentImage, 
                         topLeftX, topLeftY, 
                         width, height)
-        
-        this.renderHealthBar(unit)
     }
 
     /**
      * Draws a health bar for a Unit on this.
      * @param unit the Unit whose health bar gets drawn on this.canvas
      */
-    renderHealthBar(unit: Unit) {        
-        let canvasX = this.canvasX(unit.x)
-        let canvasY = this.canvasY(unit.y)
+    renderHealthBar(coord: XYCoord, unit: Unit) {        
+        let canvasX = this.canvasX(coord.x)
+        let canvasY = this.canvasY(coord.y)
 
         let topLeftX = canvasX - unit.health_bar_width * this.space_size/2
         let topLeftY = canvasY - this.space_size * (unit.size + unit.health_bar_height)
@@ -287,14 +314,25 @@ function UnitCardClickEvent(event: MouseEvent, unitCardId: string, index: number
     selectedDropUnit = Object.assign({}, unitCardUnits[index])
     DeselectUnitCards()
     document.getElementById(unitCardId).classList.add("unit-card-selected")
+    
+    let dropUnitIsSpell = false // TODO: actually check if selectedDropUnit isn't a spell
+    if (dropUnitIsSpell == false) {
+        board.showNoDropZone = true
+    }
 }
 
 function CanvasClickEvent(event: MouseEvent): void {
     if (selectedDropUnit != null && 
-        selectedDropUnit.side.grease >= selectedDropUnit.grease_cost) { // TODO: Don't allow user to drop unit outside of their zone
+        selectedDropUnit.side.grease >= selectedDropUnit.grease_cost) {
         // calculate where the unit would be on the canvas
         let mouseBoardX = board.boardX(event.offsetX)
         let mouseBoardY = board.boardY(event.offsetY)
+
+        if (userMayDrop(selectedDropUnit, mouseBoardX, mouseBoardY) == false) {
+            return
+        }
+        board.showNoDropZone = false
+
         // drop it there 
         let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.grease_cost)        
         newUnit = Object.assign(newUnit, selectedDropUnit)
@@ -307,6 +345,10 @@ function CanvasClickEvent(event: MouseEvent): void {
         DeselectUnitCards()
         selectedDropUnit = null
     }
+}
+
+function userMayDrop(selectedDropUnit: Unit, boardX: number, boardY: number): boolean {
+    return boardY > (1 - board.usersPercentOfBoard/100) * board.y_spaces
 }
 
 function DeselectUnitCards(): void {
@@ -346,10 +388,10 @@ function StartGame(): void {
     board.addUnit(BlueRestaurant)
 
     let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], ["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"]))
-    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], 
-                                                        ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"], 
-                                                        ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png", "images/Burger/Burger Walking from behind-03.png"], 
-                                                        ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 03.png"])
+    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-02.png", "images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png"], 
+                                                        ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 01.png", "images/Burger/Burger 03.png"], 
+                                                        ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-02.png", "images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png"], 
+                                                        ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 01.png", "images/Burger/Burger 03.png"])
 
     let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12)
     let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 3, 15)
