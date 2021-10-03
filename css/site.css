@@ -60,7 +60,7 @@ footer {
 .grease-bar p {
     position: absolute;
     margin: 0;
-    background-color: hsl(290, 40%, 60%);
+    background-color: hsl(290, 22%, 60%);
     width: 70%;
     height: 100%;
 }
