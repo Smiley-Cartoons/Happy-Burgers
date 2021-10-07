@@ -338,6 +338,8 @@ function CanvasClickEvent(event: MouseEvent): void {
         newUnit = Object.assign(newUnit, selectedDropUnit)
         newUnit.x = mouseBoardX
         newUnit.y = mouseBoardY + newUnit.size/2
+        newUnit.targetPosition = new XYCoord(board.redFranchise.mainTower.x, 
+                                             board.redFranchise.mainTower.y)
         board.addUnit(newUnit)
 
         selectedDropUnit.side.grease -= selectedDropUnit.grease_cost
@@ -378,7 +380,7 @@ function StartGame(): void {
     const BlueToRedLeftPath = new Path(RedToBlueLeftPath.points.filter(() => true).reverse())
     const BlueToRedRightPath = new Path(RedToBlueRightPath.points.filter(() => true).reverse())
 
-    let restaurantImages = new UnitImages(new UnitGroupItemsByDirection([""], ["images/Restaurant/Restaurant-01.png"], [""], [""]))
+    let restaurantImages = new UnitImages(new UnitGroupItemsByDirection([""], ["images/Restaurant/Restaurant_Down1.png"], [""], [""]))
     const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 9, 30)
     const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 9, 30)
     
@@ -387,18 +389,17 @@ function StartGame(): void {
     board.blueFranchise.mainTower = BlueRestaurant
     board.addUnit(BlueRestaurant)
 
-    let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"], ["images/Burger/Burger Walking from behind-01.png"], ["images/Burger/Burger 01.png"]))
-    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-02.png", "images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png"], 
-                                                        ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 01.png", "images/Burger/Burger 03.png"], 
-                                                        ["images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-02.png", "images/Burger/Burger Walking from behind-01.png", "images/Burger/Burger Walking from behind-03.png"], 
-                                                        ["images/Burger/Burger 01.png", "images/Burger/Burger 02.png", "images/Burger/Burger 01.png", "images/Burger/Burger 03.png"])
+    let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.jpg"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Walking_Down1.jpg"]))
+    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.jpg", "images/Burger/Burger_Walking_Up2.jpg", "images/Burger/Burger_Walking_Up1.jpg", "images/Burger/Burger_Walking_Up3.jpg"], 
+                                                        ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"], 
+                                                        ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"], 
+                                                        ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"])
 
-    let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12)
-    let u2 = new Unit(images, board.redFranchise, 100, 40, 40, 3, 15)
-    board.addUnit(u1)
-    board.addUnit(u2)
+    let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12, 0.5)
+    let u2 = new Unit(images, board.blueFranchise, 130, 40, 40, 3, 15, 0.6)
+    let u3 = new Unit(images, board.blueFranchise, 80, 40, 40, 3, 10, 1)
 
-    let units = [...[BlueRestaurant, u1, u2, u1, BlueRestaurant, u1, u2]]
+    let units = [...[u1, u2, u3, u1, u2, u3, u1]]
     RenderUnitCards(units)
     board.startGame()
 }
