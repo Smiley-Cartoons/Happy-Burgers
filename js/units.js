@@ -12,7 +12,7 @@ class Unit {
      * @param  {number} grease_cost how much grease it costs this.side to spawn this
      * @param  {number=10} size diameter of unit in board spaces
      */
-    constructor(images, side, health, x, y, grease_cost, size = 10) {
+    constructor(images, side, health, x, y, grease_cost, size = 10, speed = 0, damage = 0) {
         this.health_bar_width = 12;
         this.health_bar_height = 2;
         this.img_tick = 1;
@@ -38,6 +38,8 @@ class Unit {
         this.x = x;
         this.y = y;
         this.size = size;
+        this.speed = speed;
+        this.damage = damage;
         this.health_bar_width = size * 4 / 5;
         this.health_bar_height = this.health_bar_width / 6;
     }

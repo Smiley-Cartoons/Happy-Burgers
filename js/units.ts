@@ -40,7 +40,8 @@ class Unit {
      * @param  {number} grease_cost how much grease it costs this.side to spawn this
      * @param  {number=10} size diameter of unit in board spaces
      */
-    constructor(images: UnitImages, side: Franchise, health: number, x: number, y: number, grease_cost: number, size: number = 10) {
+    constructor(images: UnitImages, side: Franchise, health: number, x: number, y: number, grease_cost: number, 
+                size: number = 10, speed: number = 0, damage: number = 0) {
         this.images = images
         if (images != null) {
             this.currentImage = images.atRestImages.item(Direction.Down)[0] // TODO: determine which image should be the initial image
@@ -54,6 +55,8 @@ class Unit {
         this.x = x
         this.y = y
         this.size = size
+        this.speed = speed
+        this.damage = damage
 
         this.health_bar_width = size*4/5
         this.health_bar_height = this.health_bar_width/6
