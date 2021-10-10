@@ -7,7 +7,8 @@ let unitCardUnits = [];
 let selectedDropUnit = null;
 /** game Board on which Units live and fight for their Side and travel on Paths of XYCoords. */
 class Board {
-    constructor(canvasId = "game_board_element", x_spaces = 100, y_spaces = 120) {
+    constructor(backgroundImage, canvasId = "game_board_element", x_spaces = 100, y_spaces = 120) {
+        this.backgroundImage = null;
         /**How far this is pushed down this.canvas (so Units can be rendered at y of zero on this and still show on this.canvas) */
         this.y_spaces_offset = 15;
         this.units = null;
@@ -23,6 +24,9 @@ class Board {
         /** Franchise that won the game. Will be either this.redFranchise or this.blueFranchise */
         this.winner = null;
         this.canvas = document.getElementById(canvasId);
+        this.canvas.onclick = CanvasClickEvent;
+        this.originalBackgroundImage = backgroundImage;
+        this.backgroundImage = this.originalBackgroundImage;
         this.ctx = this.canvas.getContext("2d");
         this.x_spaces = x_spaces;
         this.y_spaces = y_spaces;
@@ -39,6 +43,7 @@ class Board {
     _tick() {
         // Resize canvas
         this.adjustBoard();
+        this.renderBackground();
         this.redFranchise._tick();
         this.blueFranchise._tick();
         this.renderGreaseBarFill();
@@ -63,6 +68,9 @@ class Board {
             this.clearAll();
             this.declareWinner();
         }
+    }
+    renderBackground() {
+        this.ctx.drawImage(this.backgroundImage, 0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
     }
     /**Draws over the background a red, translucent sheet to show the zone where the user may not drop a new Unit. */
     renderNoDropZone() {
@@ -292,21 +300,12 @@ function DeselectUnitCards() {
     }
 }
 function StartGame() {
-    board = new Board();
-    board.canvas.onclick = CanvasClickEvent;
+    const background = new Image();
+    background.src = "images/Backgrounds/Roads & grassy fields background.jpg";
+    board = new Board(background);
     unitCardContainer = document.getElementById("unit-card-container");
     const RedTowerPoint = new XYCoord(board.x_spaces / 2, 20);
     const BlueTowerPoint = new XYCoord(board.x_spaces / 2, board.y_spaces - 20);
-    const NWPoint = new XYCoord(25, 30);
-    const WPoint = new XYCoord(25, board.y_spaces / 2);
-    const SWPoint = new XYCoord(25, board.y_spaces - 30);
-    const NEPoint = new XYCoord(board.x_spaces - 25, 30);
-    const EPoint = new XYCoord(board.x_spaces - 25, board.y_spaces / 2);
-    const SEPoint = new XYCoord(board.x_spaces - 25, board.y_spaces - 30);
-    const RedToBlueLeftPath = new Path([RedTowerPoint, NWPoint, WPoint, SWPoint, BlueTowerPoint]);
-    const RedToBlueRightPath = new Path([RedTowerPoint, NEPoint, EPoint, SEPoint, BlueTowerPoint]);
-    const BlueToRedLeftPath = new Path(RedToBlueLeftPath.points.filter(() => true).reverse());
-    const BlueToRedRightPath = new Path(RedToBlueRightPath.points.filter(() => true).reverse());
     let restaurantImages = new UnitImages(new UnitGroupItemsByDirection([""], ["images/Restaurant/Restaurant_Down1.png"], [""], [""]));
     const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 9, 30);
     const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 9, 30);
