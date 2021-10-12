@@ -22,7 +22,7 @@ class Board {
     /**How far this is pushed down this.canvas (so Units can be rendered at y of zero on this and still show on this.canvas) */
     y_spaces_offset: number = 15
     space_size: number
-    private units: Unit[] = null
+    private units: IUnit[] = null
     private healthBarsToRenderAtXY: healthBarInfoTuple[] = []
     static readonly millis_per_tick = 25
     gameIsOver = false
@@ -79,7 +79,9 @@ class Board {
 
         this.units.forEach((unit, index, array) => {
             this.renderUnit(unit)
-            this.healthBarsToRenderAtXY.push([new XYCoord(unit.x, unit.y), unit])
+            if (unit as Unit) {
+                this.healthBarsToRenderAtXY.push([new XYCoord(unit.x, unit.y), unit as Unit])
+            }
             unit._tick()
         })
 
@@ -129,7 +131,7 @@ class Board {
         this.canvas.width = this.canvas.width
     }
 
-    addUnit(unit: Unit, side: Franchise = null) {
+    addUnit(unit: IUnit, side: Franchise = null) {
         if (side !== null) {
             unit.side = side
             side.units.push(unit)
@@ -169,7 +171,7 @@ class Board {
      * Does not render a health bar for unit.
      * @param unit the Unit that gets drawn on the this.canvas
      */
-    renderUnit(unit: Unit) {
+    renderUnit(unit: IUnit) {
         let ratio = (unit.currentImage.width / unit.currentImage.height) * this.space_size
         let topLeftX = this.canvasX(unit.x) - ratio*unit.size/2
         let topLeftY = this.canvasY(unit.y) - this.space_size*unit.size
@@ -269,7 +271,7 @@ class Franchise {
     name: string
     mainTower: Unit = null
     /**Includes this.mainTower */
-    units: Unit[] = []
+    units: IUnit[] = []
     /**The currency/material this must have enough of to spawn a new Unit */
     grease: number = 0
     static readonly max_grease = 12

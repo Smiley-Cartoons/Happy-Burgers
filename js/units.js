@@ -173,3 +173,8 @@ var Direction;
     Direction[Direction["Left"] = 2] = "Left";
     Direction[Direction["Right"] = 3] = "Right";
 })(Direction || (Direction = {}));
+class Spell {
+    _tick() {
+        throw new Error("Method not implemented."); // TODO: recycle animation logic
+    }
+}

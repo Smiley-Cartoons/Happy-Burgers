@@ -1,9 +1,29 @@
 "use strict"
 
+interface IUnit {
+    currentImage: HTMLImageElement
+    x: number
+    y: number
+    size: number
+
+    side: Franchise
+    /**how much grease it costs this.side to spawn this */
+    grease_cost: number
+    speed: number
+    damage: number
+    armor: number
+    armorPiercing: number
+
+    // where the unit is going to
+    targetPosition: XYCoord
+
+    _tick(): void
+}
+
 /**
  * A tower/soldier/whatever to fight for a Side on a game Board
  */
-class Unit {
+class Unit implements IUnit {
     images: UnitImages
     currentImage: HTMLImageElement
     x: number
@@ -195,4 +215,23 @@ enum Direction {
     Down,
     Left,
     Right
+}
+
+
+class Spell implements IUnit { // TODO: finish spell class
+    currentImage: HTMLImageElement
+    x: number
+    y: number
+    size: number
+    side: Franchise
+    grease_cost: number
+    speed: number
+    damage: number
+    armor: number
+    armorPiercing: number
+    targetPosition: XYCoord
+    _tick(): void {
+        throw new Error("Method not implemented.") // TODO: recycle animation logic
+    }
+
 }

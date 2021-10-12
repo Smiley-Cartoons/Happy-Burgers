@@ -54,7 +54,9 @@ class Board {
         this.healthBarsToRenderAtXY = [];
         this.units.forEach((unit, index, array) => {
             this.renderUnit(unit);
-            this.healthBarsToRenderAtXY.push([new XYCoord(unit.x, unit.y), unit]);
+            if (unit) {
+                this.healthBarsToRenderAtXY.push([new XYCoord(unit.x, unit.y), unit]);
+            }
             unit._tick();
         });
         this.healthBarsToRenderAtXY.forEach((bar) => {
