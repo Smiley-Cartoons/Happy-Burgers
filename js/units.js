@@ -97,18 +97,19 @@ class Unit {
      */
     calcDirection(xdis, ydis) {
         // change direction (down, up, left, right) based on angle
-        let movementAngle = Math.atan2(xdis, -ydis) * 180 / Math.PI; // minus ydis because in html and on the board +y is down
+        let ma = Math.atan2(-ydis, xdis);
+        let movementAngle = ma * 180 / Math.PI; // minus ydis because in html and on the board +y is down
         if (-135 < movementAngle && movementAngle < -45) {
             this.direction = Direction.Down;
         }
         else if (-45 < movementAngle && movementAngle < 45) {
-            this.direction = Direction.Left;
+            this.direction = Direction.Right;
         }
         else if (45 < movementAngle && movementAngle < 135) {
             this.direction = Direction.Up;
         }
         else {
-            this.direction = Direction.Right;
+            this.direction = Direction.Left;
         }
     }
     get doesWantToTravel() {
@@ -174,6 +175,19 @@ var Direction;
     Direction[Direction["Right"] = 3] = "Right";
 })(Direction || (Direction = {}));
 class Spell {
+    constructor() {
+        this.currentImage = null;
+        this.x = 0;
+        this.y = 0;
+        this.size = 0;
+        this.side = null;
+        this.grease_cost = 0;
+        this.speed = 0;
+        this.damage = 0;
+        this.armor = 0;
+        this.armorPiercing = 0;
+        this.targetPosition = null;
+    }
     _tick() {
         throw new Error("Method not implemented."); // TODO: recycle animation logic
     }

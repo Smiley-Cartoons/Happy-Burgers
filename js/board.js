@@ -266,8 +266,7 @@ function UnitCardClickEvent(event, unitCardId, index) {
     selectedDropUnit = Object.assign({}, unitCardUnits[index]);
     DeselectUnitCards();
     document.getElementById(unitCardId).classList.add("unit-card-selected");
-    let dropUnitIsSpell = false; // TODO: actually check if selectedDropUnit isn't a spell
-    if (dropUnitIsSpell == false) {
+    if (selectedDropUnit) {
         board.showNoDropZone = true;
     }
 }
@@ -282,7 +281,13 @@ function CanvasClickEvent(event) {
         }
         board.showNoDropZone = false;
         // drop it there 
-        let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.grease_cost);
+        let newUnit = null;
+        if (selectedDropUnit.constructor.name === Spell.name) {
+            newUnit = new Spell();
+        }
+        else {
+            newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, 1, 0, 0, selectedDropUnit.grease_cost);
+        }
         newUnit = Object.assign(newUnit, selectedDropUnit);
         newUnit.x = mouseBoardX;
         newUnit.y = mouseBoardY + newUnit.size / 2;
@@ -315,8 +320,8 @@ function StartGame() {
     board.addUnit(RedRestaurant);
     board.blueFranchise.mainTower = BlueRestaurant;
     board.addUnit(BlueRestaurant);
-    let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.jpg"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Walking_Down1.jpg"]));
-    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.jpg", "images/Burger/Burger_Walking_Up2.jpg", "images/Burger/Burger_Walking_Up1.jpg", "images/Burger/Burger_Walking_Up3.jpg"], ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"], ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"], ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"]);
+    let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Standing_Left1.png"], ["images/Burger/Burger_Standing_Right1.png"]));
+    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up2.png", "images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up3.png"], ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"], ["images/Burger/Burger_Standing_Left1.png", "images/Burger/Burger_Walking_Left1.png", "images/Burger/Burger_Standing_Left1.png", "images/Burger/Burger_Walking_Left2.png"], ["images/Burger/Burger_Standing_Right1.png", "images/Burger/Burger_Walking_Right1.png", "images/Burger/Burger_Standing_Right1.png", "images/Burger/Burger_Walking_Right2.png"]);
     let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12, 0.5);
     let u2 = new Unit(images, board.blueFranchise, 130, 40, 40, 3, 15, 0.6);
     let u3 = new Unit(images, board.blueFranchise, 80, 40, 40, 3, 10, 1);
