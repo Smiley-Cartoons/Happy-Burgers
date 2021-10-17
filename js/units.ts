@@ -1,9 +1,30 @@
 "use strict"
 
+interface IUnit {
+    images: UnitImages
+    currentImage: HTMLImageElement
+    x: number
+    y: number
+    size: number
+
+    side: Franchise
+    /**how much grease it costs this.side to spawn this */
+    grease_cost: number
+    speed: number
+    damage: number
+    armor: number
+    armorPiercing: number
+
+    // where the unit is going to
+    targetPosition: XYCoord
+
+    _tick(): void
+}
+
 /**
  * A tower/soldier/whatever to fight for a Side on a game Board
  */
-class Unit {
+class Unit implements IUnit {
     images: UnitImages
     currentImage: HTMLImageElement
     x: number
@@ -122,11 +143,12 @@ class Unit {
      */
     calcDirection(xdis: number, ydis: number): void {
         // change direction (down, up, left, right) based on angle
-        let movementAngle = Math.atan2(xdis, -ydis)*180/Math.PI // minus ydis because in html and on the board +y is down
+        let ma = Math.atan2(-ydis, xdis)
+        let movementAngle = ma*180/Math.PI // minus ydis because in html and on the board +y is down
         if (-135 < movementAngle && movementAngle < -45) { this.direction = Direction.Down}
-        else if (-45 < movementAngle && movementAngle < 45) { this.direction = Direction.Left}
+        else if (-45 < movementAngle && movementAngle < 45) { this.direction = Direction.Right}
         else if (45 < movementAngle && movementAngle < 135) { this.direction = Direction.Up}
-        else { this.direction = Direction.Right}
+        else { this.direction = Direction.Left}
     }
 
     get doesWantToTravel(): boolean {
@@ -195,4 +217,24 @@ enum Direction {
     Down,
     Left,
     Right
+}
+
+
+class Spell implements IUnit {
+    images: UnitImages // TODO: finish spell class
+    currentImage: HTMLImageElement = null
+    x: number = 0
+    y: number = 0
+    size: number = 0
+    side: Franchise = null
+    grease_cost: number = 0
+    speed: number = 0
+    damage: number = 0
+    armor: number = 0
+    armorPiercing: number = 0
+    targetPosition: XYCoord = null
+    _tick(): void {
+        throw new Error("Method not implemented.") // TODO: recycle animation logic
+    }
+
 }

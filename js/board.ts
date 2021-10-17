@@ -6,8 +6,8 @@ let unitCardContainer = null
 let thereIsDropUnit: boolean = false
 const dropUnitId = "drop-unit"
 
-let unitCardUnits: Unit[] = []
-let selectedDropUnit: Unit = null
+let unitCardUnits: IUnit[] = []
+let selectedDropUnit: IUnit = null
 
 type healthBarInfoTuple = [XYCoord, Unit]
 
@@ -22,7 +22,7 @@ class Board {
     /**How far this is pushed down this.canvas (so Units can be rendered at y of zero on this and still show on this.canvas) */
     y_spaces_offset: number = 15
     space_size: number
-    private units: Unit[] = null
+    private units: IUnit[] = null
     private healthBarsToRenderAtXY: healthBarInfoTuple[] = []
     static readonly millis_per_tick = 25
     gameIsOver = false
@@ -79,7 +79,9 @@ class Board {
 
         this.units.forEach((unit, index, array) => {
             this.renderUnit(unit)
-            this.healthBarsToRenderAtXY.push([new XYCoord(unit.x, unit.y), unit])
+            if (unit as Unit) {
+                this.healthBarsToRenderAtXY.push([new XYCoord(unit.x, unit.y), unit as Unit])
+            }
             unit._tick()
         })
 
@@ -129,7 +131,7 @@ class Board {
         this.canvas.width = this.canvas.width
     }
 
-    addUnit(unit: Unit, side: Franchise = null) {
+    addUnit(unit: IUnit, side: Franchise = null) {
         if (side !== null) {
             unit.side = side
             side.units.push(unit)
@@ -169,7 +171,7 @@ class Board {
      * Does not render a health bar for unit.
      * @param unit the Unit that gets drawn on the this.canvas
      */
-    renderUnit(unit: Unit) {
+    renderUnit(unit: IUnit) {
         let ratio = (unit.currentImage.width / unit.currentImage.height) * this.space_size
         let topLeftX = this.canvasX(unit.x) - ratio*unit.size/2
         let topLeftY = this.canvasY(unit.y) - this.space_size*unit.size
@@ -269,7 +271,7 @@ class Franchise {
     name: string
     mainTower: Unit = null
     /**Includes this.mainTower */
-    units: Unit[] = []
+    units: IUnit[] = []
     /**The currency/material this must have enough of to spawn a new Unit */
     grease: number = 0
     static readonly max_grease = 12
@@ -326,8 +328,7 @@ function UnitCardClickEvent(event: MouseEvent, unitCardId: string, index: number
     DeselectUnitCards()
     document.getElementById(unitCardId).classList.add("unit-card-selected")
     
-    let dropUnitIsSpell = false // TODO: actually check if selectedDropUnit isn't a spell
-    if (dropUnitIsSpell == false) {
+    if (selectedDropUnit as Unit) {
         board.showNoDropZone = true
     }
 }
@@ -345,12 +346,17 @@ function CanvasClickEvent(event: MouseEvent): void {
         board.showNoDropZone = false
 
         // drop it there 
-        let newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, selectedDropUnit.health, 0, 0, selectedDropUnit.grease_cost)        
+        let newUnit = null
+        if (selectedDropUnit.constructor.name === Spell.name) {
+            newUnit = new Spell()
+        } else {
+            newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, 1, 0, 0, selectedDropUnit.grease_cost)
+        }
         newUnit = Object.assign(newUnit, selectedDropUnit)
         newUnit.x = mouseBoardX
         newUnit.y = mouseBoardY + newUnit.size/2
         newUnit.targetPosition = new XYCoord(board.redFranchise.mainTower.x, 
-                                             board.redFranchise.mainTower.y)
+                                            board.redFranchise.mainTower.y)
         board.addUnit(newUnit)
 
         selectedDropUnit.side.grease -= selectedDropUnit.grease_cost
@@ -360,7 +366,7 @@ function CanvasClickEvent(event: MouseEvent): void {
     }
 }
 
-function userMayDrop(selectedDropUnit: Unit, boardX: number, boardY: number): boolean {
+function userMayDrop(selectedDropUnit: IUnit, boardX: number, boardY: number): boolean {
     return boardY > (1 - board.usersPercentOfBoard/100) * board.y_spaces
 }
 
@@ -389,11 +395,11 @@ function StartGame(): void {
     board.blueFranchise.mainTower = BlueRestaurant
     board.addUnit(BlueRestaurant)
 
-    let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.jpg"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Walking_Down1.jpg"]))
-    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.jpg", "images/Burger/Burger_Walking_Up2.jpg", "images/Burger/Burger_Walking_Up1.jpg", "images/Burger/Burger_Walking_Up3.jpg"], 
+    let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Standing_Left1.png"], ["images/Burger/Burger_Standing_Right1.png"]))
+    images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up2.png", "images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up3.png"], 
                                                         ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"], 
-                                                        ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"], 
-                                                        ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"])
+                                                        ["images/Burger/Burger_Standing_Left1.png", "images/Burger/Burger_Walking_Left1.png", "images/Burger/Burger_Standing_Left1.png", "images/Burger/Burger_Walking_Left2.png"], 
+                                                        ["images/Burger/Burger_Standing_Right1.png", "images/Burger/Burger_Walking_Right1.png", "images/Burger/Burger_Standing_Right1.png", "images/Burger/Burger_Walking_Right2.png"])
 
     let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12, 0.5)
     let u2 = new Unit(images, board.blueFranchise, 130, 40, 40, 3, 15, 0.6)
