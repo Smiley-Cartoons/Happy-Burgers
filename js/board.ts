@@ -398,8 +398,8 @@ function StartGame(): void {
     let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Standing_Left1.png"], ["images/Burger/Burger_Standing_Right1.png"]))
     images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up2.png", "images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up3.png"], 
                                                         ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"], 
-                                                        ["images/Burger/Burger_Standing_Left1.png", "images/Burger/Burger_Walking_Left1.png", "images/Burger/Burger_Standing_Left1.png", "images/Burger/Burger_Walking_Left2.png"], 
-                                                        ["images/Burger/Burger_Standing_Right1.png", "images/Burger/Burger_Walking_Right1.png", "images/Burger/Burger_Standing_Right1.png", "images/Burger/Burger_Walking_Right2.png"])
+                                                        ["images/Burger/Burger_Walking_Left1.png", "images/Burger/Burger_Walking_Left2.png"],
+                                                        ["images/Burger/Burger_Walking_Right1.png", "images/Burger/Burger_Walking_Right2.png"])
 
     let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12, 0.5)
     let u2 = new Unit(images, board.blueFranchise, 130, 40, 40, 3, 15, 0.6)
