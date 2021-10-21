@@ -30,8 +30,8 @@ class Unit implements IUnit {
     x: number
     y: number
     size: number
-    health_bar_width: number = 12
-    health_bar_height: number = 2
+    health_bar_width = 12
+    health_bar_height = 2
     private img_tick:number = 1
     private img_index:number = 0
     ticks_per_image:number = 1
@@ -43,11 +43,11 @@ class Unit implements IUnit {
     /**how much grease it costs this.side to spawn this */
     grease_cost: number
     originalHealth: number
-    health: number
-    speed: number = 0
-    damage: number = 0
-    armor: number = 0
-    armorPiercing: number = 0
+    health = 1
+    speed = 0
+    damage = 0
+    armor = 0
+    armorPiercing = 0
 
     // where the unit is going to
     targetPosition: XYCoord = null
@@ -61,12 +61,15 @@ class Unit implements IUnit {
      * @param  {number} grease_cost how much grease it costs this.side to spawn this
      * @param  {number} size height of unit in board spaces. width is derived from this stat.
      */
-    constructor(images: UnitImages, side: Franchise, health: number, x: number, y: number, grease_cost: number, 
-                size: number, speed: number = 0, damage: number = 0) {
+    constructor(images: UnitImages, cardImage: string, side: Franchise, health = 100, x = 0, y = 0, grease_cost = 1, 
+                size = 5, speed = 0, damage = 0, armor = 0, armorPiercing = 0) {
         this.images = images
         if (images != null) {
             this.currentImage = images.atRestImages.item(Direction.Down)[0] // TODO: determine which image should be the initial image
         }
+        this.cardImage = new Image()
+        this.cardImage.src = cardImage
+        
         this.side = side
 
         this.grease_cost = grease_cost
@@ -78,6 +81,8 @@ class Unit implements IUnit {
         this.size = size
         this.speed = speed
         this.damage = damage
+        this.armor = armor
+        this.armorPiercing = armorPiercing
 
         this.health_bar_width = size*4/5
         this.health_bar_height = this.health_bar_width/6
@@ -224,24 +229,24 @@ class Spell implements IUnit {
     images: HTMLImageElement[] = [] // TODO: finish spell class
     cardImage: HTMLImageElement = null
     currentImage: HTMLImageElement = null
-    x: number = 0
-    y: number = 0
-    size: number = 0
+    x = 0
+    y = 0
+    size = 0
     side: Franchise = null
-    grease_cost: number = 0
-    speed: number = 0
-    damage: number = 0
-    armorPiercing: number = 0
+    grease_cost = 0
+    speed = 0
+    damage = 0
+    armorPiercing = 0
     targetPosition: XYCoord = null
 
     /**
      * The time in milliseconds this Spell lasts before being removed.
      */
-    duration: number = 1000
+    duration = 1000
     /**
      * How many milliseconds this has been around.
      */
-    private age: number = 0
+    private age = 0
 
     /** 
      * (Must accept one parameter, being of type Spell, that is at runtime the spell calling this function.)
@@ -320,5 +325,27 @@ Cheese.grease_cost = 2
 Cheese.size = 8
 Cheese.speed = 0
 Cheese.damage = 0
+
+
+let burgerImages = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Walking_Left2.png"], ["images/Burger/Burger_Walking_Right2.png"]))
+burgerImages.movingImages = new UnitGroupItemsByDirection(
+                                ["images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up2.png", "images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up3.png"], 
+                                ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"], 
+                                ["images/Burger/Burger_Walking_Left1.png", "images/Burger/Burger_Walking_Left2.png"],
+                                ["images/Burger/Burger_Walking_Right1.png", "images/Burger/Burger_Walking_Right2.png"])
+burgerImages.fightingImages = null // TODO: Add fighting images!
+burgerImages.dyingImages = new UnitGroupItemsByDirection(
+                                ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+                                ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+                                ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+                                ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"])
+
+const Burger = new Unit(burgerImages, "images/Burger/Burger_Walking_Down1.jpg", null)
+Burger.health = 100
+Burger.grease_cost = 2
+Burger.size = 5
+Burger.speed = 0.5
+Burger.damage = 15
+
 
 
