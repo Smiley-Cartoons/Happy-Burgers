@@ -10,9 +10,10 @@ class Unit {
      * @param  {number} x board x coordinate
      * @param  {number} y board y coordinate
      * @param  {number} grease_cost how much grease it costs this.side to spawn this
-     * @param  {number=10} size diameter of unit in board spaces
+     * @param  {number} size height of unit in board spaces. width is derived from this stat.
      */
-    constructor(images, side, health, x, y, grease_cost, size = 10, speed = 0, damage = 0) {
+    constructor(images, side, health, x, y, grease_cost, size, speed = 0, damage = 0) {
+        this.cardImage = null;
         this.health_bar_width = 12;
         this.health_bar_height = 2;
         this.img_tick = 1;
@@ -175,7 +176,9 @@ var Direction;
     Direction[Direction["Right"] = 3] = "Right";
 })(Direction || (Direction = {}));
 class Spell {
-    constructor() {
+    constructor(images = null, cardImage = null) {
+        this.images = []; // TODO: finish spell class
+        this.cardImage = null;
         this.currentImage = null;
         this.x = 0;
         this.y = 0;
@@ -184,11 +187,72 @@ class Spell {
         this.grease_cost = 0;
         this.speed = 0;
         this.damage = 0;
-        this.armor = 0;
         this.armorPiercing = 0;
         this.targetPosition = null;
+        /**
+         * The time in milliseconds this Spell lasts before being removed.
+         */
+        this.duration = 1000;
+        /**
+         * How many milliseconds this has been around.
+         */
+        this.age = 0;
+        /**
+         * (Must accept one parameter, being of type Spell, that is at runtime the spell calling this function.)
+         *
+         * The action this performs every board tick.
+         */
+        this.spell = (spell) => { return spell !== null; };
+        this.img_tick = 1;
+        this.img_index = 0;
+        this.ticks_per_image = 1;
+        this.animationTime = 1; // in seconds
+        if (images !== null) {
+            for (let img of images) {
+                let newImg = new Image();
+                newImg.src = img;
+                this.images.push(newImg);
+            }
+            this.currentImage = this.images[0];
+        }
+        if (cardImage !== null) {
+            this.cardImage = new Image();
+            this.cardImage.src = cardImage;
+        }
     }
     _tick() {
-        throw new Error("Method not implemented."); // TODO: recycle animation logic
+        this.age += Board.millis_per_tick;
+        if (this.age > this.duration) {
+            // TODO: make the spell not exist anymore
+        }
+        else { // do spell animation
+            this.ticks_per_image = 1000 * (this.animationTime / this.images.length) / Board.millis_per_tick; // TODO: refactor: move equations so they're not calculated every frame?
+            this.img_tick += 1;
+            if (this.img_tick > this.ticks_per_image) {
+                this.img_tick = 1;
+                this.img_index += 1;
+                if (this.img_index >= this.images.length) {
+                    this.img_index = 0;
+                }
+            }
+            this.currentImage = this.images[this.img_index];
+            // Execute spell action
+            this.spell(this);
+        }
     }
 }
+//######################################################################################################################
+//
+//      UNIT STATS
+//
+//######################################################################################################################
+const Cheese = new Spell(["images/Spells/Cheese/Cheese_Melting1.png",
+    "images/Spells/Cheese/Cheese_Melting2.png",
+    "images/Spells/Cheese/Cheese_Melting3.png"], "images/Spells/Cheese/Cheeseblock1.png");
+Cheese.spell = (spell) => {
+};
+Cheese.duration = 2000;
+Cheese.grease_cost = 2;
+Cheese.size = 8;
+Cheese.speed = 0;
+Cheese.damage = 0;

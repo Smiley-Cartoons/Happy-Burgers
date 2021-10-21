@@ -16,8 +16,10 @@ class Board {
         this.gameIsOver = false;
         /**AI or opponent's side */
         this.redFranchise = null;
+        this.redSideName = "Red";
         /**User's side */
         this.blueFranchise = null;
+        this.blueSideName = "Blue";
         /**What percent of this.y_spaces away from the back edge of the user's side of this the user may drop a new Unit. */
         this.usersPercentOfBoard = 50;
         this.showNoDropZone = false;
@@ -32,8 +34,8 @@ class Board {
         this.y_spaces = y_spaces;
         this.units = [];
         this.gameIsOver = false;
-        this.redFranchise = new Franchise("Red");
-        this.blueFranchise = new Franchise("Blue");
+        this.redFranchise = new Franchise(this.redSideName);
+        this.blueFranchise = new Franchise(this.blueSideName);
     }
     // Kicks off game clock ticking cycle
     startGame() {
@@ -255,7 +257,7 @@ function RenderUnitCards(units) {
         newCard.id = `unit-card${index}`;
         unitCardUnits.push(unit);
         newCard.className = "unit-card";
-        newCard.innerHTML = `<img src="${unit.images.atRestImages.item(Direction.Down)[0].src}">`;
+        newCard.innerHTML = `<img src="${unit.cardImage.src}">`;
         let num = index;
         newCard.onclick = (event) => { UnitCardClickEvent(event, newCard.id, num); };
         unitCardContainer.appendChild(newCard);
@@ -286,12 +288,15 @@ function CanvasClickEvent(event) {
             newUnit = new Spell();
         }
         else {
-            newUnit = new Unit(selectedDropUnit.images, selectedDropUnit.side, 1, 0, 0, selectedDropUnit.grease_cost);
+            newUnit = new Unit(null, selectedDropUnit.side, 1, 0, 0, selectedDropUnit.grease_cost, 1);
         }
         newUnit = Object.assign(newUnit, selectedDropUnit);
         newUnit.x = mouseBoardX;
         newUnit.y = mouseBoardY + newUnit.size / 2;
         newUnit.targetPosition = new XYCoord(board.redFranchise.mainTower.x, board.redFranchise.mainTower.y);
+        if (newUnit.constructor.name === Unit.name) {
+            newUnit.currentImage = newUnit.images.atRestImages.item(Direction.Up)[0];
+        }
         board.addUnit(newUnit);
         selectedDropUnit.side.grease -= selectedDropUnit.grease_cost;
         DeselectUnitCards();
@@ -311,20 +316,20 @@ function StartGame() {
     background.src = "images/Backgrounds/Roads & grassy fields background.jpg";
     board = new Board(background);
     unitCardContainer = document.getElementById("unit-card-container");
-    const RedTowerPoint = new XYCoord(board.x_spaces / 2, 20);
-    const BlueTowerPoint = new XYCoord(board.x_spaces / 2, board.y_spaces - 20);
+    const RedTowerPoint = new XYCoord(board.x_spaces / 2, 15);
+    const BlueTowerPoint = new XYCoord(board.x_spaces / 2, board.y_spaces - 15);
     let restaurantImages = new UnitImages(new UnitGroupItemsByDirection([""], ["images/Restaurant/Restaurant_Down1.png"], [""], [""]));
-    const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 9, 30);
-    const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 9, 30);
+    const RedRestaurant = new Unit(restaurantImages, board.redFranchise, 1200, RedTowerPoint.x, RedTowerPoint.y, 9, 20);
+    const BlueRestaurant = new Unit(restaurantImages, board.blueFranchise, 1200, BlueTowerPoint.x, BlueTowerPoint.y, 9, 20);
     board.redFranchise.mainTower = RedRestaurant;
     board.addUnit(RedRestaurant);
     board.blueFranchise.mainTower = BlueRestaurant;
     board.addUnit(BlueRestaurant);
-    let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Standing_Left1.png"], ["images/Burger/Burger_Standing_Right1.png"]));
+    let images = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Walking_Left2.png"], ["images/Burger/Burger_Walking_Right2.png"]));
     images.movingImages = new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up2.png", "images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up3.png"], ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"], ["images/Burger/Burger_Walking_Left1.png", "images/Burger/Burger_Walking_Left2.png"], ["images/Burger/Burger_Walking_Right1.png", "images/Burger/Burger_Walking_Right2.png"]);
-    let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 12, 0.5);
-    let u2 = new Unit(images, board.blueFranchise, 130, 40, 40, 3, 15, 0.6);
-    let u3 = new Unit(images, board.blueFranchise, 80, 40, 40, 3, 10, 1);
+    let u1 = new Unit(images, board.blueFranchise, 100, 20, 40, 2, 9, 0.5);
+    let u2 = new Unit(images, board.blueFranchise, 130, 40, 40, 3, 11, 0.6);
+    let u3 = new Unit(images, board.blueFranchise, 80, 40, 40, 3, 7, 1);
     let units = [...[u1, u2, u3, u1, u2, u3, u1]];
     RenderUnitCards(units);
     board.startGame();
