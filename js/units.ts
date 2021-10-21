@@ -1,7 +1,7 @@
 "use strict"
 
 interface IUnit {
-    images: UnitImages
+    cardImage: HTMLImageElement
     currentImage: HTMLImageElement
     x: number
     y: number
@@ -12,7 +12,6 @@ interface IUnit {
     grease_cost: number
     speed: number
     damage: number
-    armor: number
     armorPiercing: number
 
     // where the unit is going to
@@ -26,12 +25,13 @@ interface IUnit {
  */
 class Unit implements IUnit {
     images: UnitImages
+    cardImage: HTMLImageElement = null
     currentImage: HTMLImageElement
     x: number
     y: number
     size: number
-    health_bar_width: number = 12
-    health_bar_height: number = 2
+    health_bar_width = 12
+    health_bar_height = 2
     private img_tick:number = 1
     private img_index:number = 0
     ticks_per_image:number = 1
@@ -43,11 +43,11 @@ class Unit implements IUnit {
     /**how much grease it costs this.side to spawn this */
     grease_cost: number
     originalHealth: number
-    health: number
-    speed: number = 0
-    damage: number = 0
-    armor: number = 0
-    armorPiercing: number = 0
+    health = 1
+    speed = 0
+    damage = 0
+    armor = 0
+    armorPiercing = 0
 
     // where the unit is going to
     targetPosition: XYCoord = null
@@ -59,14 +59,17 @@ class Unit implements IUnit {
      * @param  {number} x board x coordinate
      * @param  {number} y board y coordinate
      * @param  {number} grease_cost how much grease it costs this.side to spawn this
-     * @param  {number=10} size diameter of unit in board spaces
+     * @param  {number} size height of unit in board spaces. width is derived from this stat.
      */
-    constructor(images: UnitImages, side: Franchise, health: number, x: number, y: number, grease_cost: number, 
-                size: number = 10, speed: number = 0, damage: number = 0) {
+    constructor(images: UnitImages, cardImage: string, side: Franchise, health = 100, x = 0, y = 0, grease_cost = 1, 
+                size = 5, speed = 0, damage = 0, armor = 0, armorPiercing = 0) {
         this.images = images
         if (images != null) {
             this.currentImage = images.atRestImages.item(Direction.Down)[0] // TODO: determine which image should be the initial image
         }
+        this.cardImage = new Image()
+        this.cardImage.src = cardImage
+
         this.side = side
 
         this.grease_cost = grease_cost
@@ -78,6 +81,8 @@ class Unit implements IUnit {
         this.size = size
         this.speed = speed
         this.damage = damage
+        this.armor = armor
+        this.armorPiercing = armorPiercing
 
         this.health_bar_width = size*4/5
         this.health_bar_height = this.health_bar_width/6
@@ -221,20 +226,142 @@ enum Direction {
 
 
 class Spell implements IUnit {
-    images: UnitImages // TODO: finish spell class
+    images: HTMLImageElement[] = [] // TODO: finish spell class
+    cardImage: HTMLImageElement = null
     currentImage: HTMLImageElement = null
-    x: number = 0
-    y: number = 0
-    size: number = 0
+    x = 0
+    y = 0
+    size = 0
     side: Franchise = null
-    grease_cost: number = 0
-    speed: number = 0
-    damage: number = 0
-    armor: number = 0
-    armorPiercing: number = 0
+    grease_cost = 0
+    speed = 0
+    damage = 0
+    armorPiercing = 0
     targetPosition: XYCoord = null
-    _tick(): void {
-        throw new Error("Method not implemented.") // TODO: recycle animation logic
+
+    /**
+     * The time in milliseconds this Spell lasts before being removed.
+     */
+    duration = 1000
+    /**
+     * How many milliseconds this has been around.
+     */
+    private age = 0
+
+    /** 
+     * (Must accept one parameter, being of type Spell, that is at runtime the spell calling this function.)
+     * 
+     * The action this performs every board tick.
+     */
+    spell: Function = (spell: Spell) => { return spell !== null}
+
+    private img_tick:number = 1
+    private img_index:number = 0
+    ticks_per_image:number = 1
+    animationTime:number = 1 // in seconds
+
+    constructor(images: string[] = null, cardImage: string = null) {
+        if (images !== null) {
+            for (let img of images) {
+                let newImg = new Image()
+                newImg.src = img
+                this.images.push(newImg)
+            }
+            this.currentImage = this.images[0]
+        }
+        if (cardImage !== null) {
+            this.cardImage = new Image()
+            this.cardImage.src = cardImage
+        }
+
     }
 
+    _tick(): void {
+        this.age += Board.millis_per_tick
+
+        if (this.age > this.duration) {
+            board.removeUnit(this)
+        }
+        else { // do spell animation
+            this.ticks_per_image = 1000*(this.animationTime/this.images.length) / Board.millis_per_tick // TODO: refactor: move equations so they're not calculated every frame?
+            this.img_tick +=1
+
+            if (this.img_tick>this.ticks_per_image){
+                this.img_tick=1
+                this.img_index +=1
+                if (this.img_index >= this.images.length) {
+                    this.img_index = 0
+                }
+            }
+
+            this.currentImage = this.images[this.img_index]
+            
+            // Execute spell action
+            this.spell(this)
+        }
+    }
+
+    surroundingUnits(): Unit[] {
+        let units = []
+        for (let unit of board.units) {
+            if (unit.constructor.name == Unit.name) {
+                let xdis = this.x - unit.x
+                let ydis = this.y - unit.y
+                let netdis = Math.sqrt(xdis**2 + ydis**2)
+
+                if (netdis < (this.size + unit.size)/2) {
+                    units.push(unit)
+                }
+            }
+        }
+        return units
+    }
 }
+
+
+
+
+
+
+//######################################################################################################################
+//
+//      UNIT STATS
+//
+//######################################################################################################################
+
+
+const Cheese = new Spell(["images/Spells/Cheese/Cheese_Melting1.png", 
+                          "images/Spells/Cheese/Cheese_Melting2.png", 
+                          "images/Spells/Cheese/Cheese_Melting3.png"],
+                          "images/Spells/Cheese/Cheeseblock1.png")
+Cheese.spell = (spell: Spell) => {//TODO: implement slow down unit
+                                    }
+Cheese.duration = 2000
+Cheese.grease_cost = 2
+Cheese.size = 8
+Cheese.speed = 0
+Cheese.damage = 0
+
+
+let burgerImages = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Walking_Left2.png"], ["images/Burger/Burger_Walking_Right2.png"]))
+burgerImages.movingImages = new UnitGroupItemsByDirection(
+                                ["images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up2.png", "images/Burger/Burger_Walking_Up1.png", "images/Burger/Burger_Walking_Up3.png"], 
+                                ["images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down2.jpg", "images/Burger/Burger_Walking_Down1.jpg", "images/Burger/Burger_Walking_Down3.jpg"], 
+                                ["images/Burger/Burger_Walking_Left1.png", "images/Burger/Burger_Walking_Left2.png"],
+                                ["images/Burger/Burger_Walking_Right1.png", "images/Burger/Burger_Walking_Right2.png"])
+burgerImages.fightingImages = null // TODO: Add fighting images!
+burgerImages.dyingImages = new UnitGroupItemsByDirection(
+                                ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+                                ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+                                ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+                                ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"])
+
+const Burger = new Unit(burgerImages, "images/Burger/Burger_Walking_Down1.jpg", null)
+Burger.health = 100
+Burger.grease_cost = 2
+Burger.size = 5
+Burger.speed = 0.5
+Burger.damage = 15
+
+
+
