@@ -228,7 +228,7 @@ class Spell {
     _tick() {
         this.age += Board.millis_per_tick;
         if (this.age > this.duration) {
-            // TODO: make the spell not exist anymore
+            board.removeUnit(this);
         }
         else { // do spell animation
             this.ticks_per_image = 1000 * (this.animationTime / this.images.length) / Board.millis_per_tick; // TODO: refactor: move equations so they're not calculated every frame?
@@ -244,6 +244,20 @@ class Spell {
             // Execute spell action
             this.spell(this);
         }
+    }
+    surroundingUnits() {
+        let units = [];
+        for (let unit of board.units) {
+            if (unit.constructor.name == Unit.name) {
+                let xdis = this.x - unit.x;
+                let ydis = this.y - unit.y;
+                let netdis = Math.sqrt(Math.pow(xdis, 2) + Math.pow(ydis, 2));
+                if (netdis < (this.size + unit.size) / 2) {
+                    units.push(unit);
+                }
+            }
+        }
+        return units;
     }
 }
 //######################################################################################################################

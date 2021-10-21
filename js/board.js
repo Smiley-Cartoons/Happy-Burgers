@@ -11,7 +11,7 @@ class Board {
         this.backgroundImage = null;
         /**How far this is pushed down this.canvas (so Units can be rendered at y of zero on this and still show on this.canvas) */
         this.y_spaces_offset = 15;
-        this.units = null;
+        this._units = null;
         this.healthBarsToRenderAtXY = [];
         this.gameIsOver = false;
         /**AI or opponent's side */
@@ -32,7 +32,7 @@ class Board {
         this.ctx = this.canvas.getContext("2d");
         this.x_spaces = x_spaces;
         this.y_spaces = y_spaces;
-        this.units = [];
+        this._units = [];
         this.gameIsOver = false;
         this.redFranchise = new Franchise(this.redSideName);
         this.blueFranchise = new Franchise(this.blueSideName);
@@ -52,9 +52,12 @@ class Board {
         if (this.showNoDropZone) {
             this.renderNoDropZone();
         }
-        this.units.sort((u1, u2) => u1.y - u2.y);
+        this._units.sort((u1, u2) => u1.y - u2.y);
         this.healthBarsToRenderAtXY = [];
-        this.units.forEach((unit, index, array) => {
+        this._units.forEach((unit, index, array) => {
+            if (unit === null) {
+                this._units.splice(index, 1);
+            }
             this.renderUnit(unit);
             if (unit) {
                 this.healthBarsToRenderAtXY.push([new XYCoord(unit.x, unit.y), unit]);
@@ -91,7 +94,7 @@ class Board {
     }
     /** Clears the canvas of units and resets the franchises. */
     clearAll() {
-        this.units = [];
+        this._units = [];
         this.redFranchise.mainTower = null;
         this.redFranchise.units = [];
         this.blueFranchise.mainTower = null;
@@ -103,7 +106,17 @@ class Board {
             unit.side = side;
             side.units.push(unit);
         }
-        this.units.push(unit);
+        this._units.push(unit);
+    }
+    removeUnit(unit) {
+        let i = this._units.indexOf(unit);
+        if (i > -1) {
+            this._units.splice(i, 1);
+        }
+        i = unit.side.units.indexOf(unit);
+        if (i > -1) {
+            unit.side.units.splice(i, 1);
+        }
     }
     checkIfGameIsOver() {
         if (this.redFranchise.mainTower.health <= 0) {
@@ -184,6 +197,9 @@ class Board {
     }
     boardY(canvasY) {
         return canvasY / this.space_size - this.y_spaces_offset;
+    }
+    get units() {
+        return [...this._units];
     }
 }
 Board.millis_per_tick = 25;

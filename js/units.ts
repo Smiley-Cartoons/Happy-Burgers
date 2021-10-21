@@ -69,7 +69,7 @@ class Unit implements IUnit {
         }
         this.cardImage = new Image()
         this.cardImage.src = cardImage
-        
+
         this.side = side
 
         this.grease_cost = grease_cost
@@ -280,7 +280,7 @@ class Spell implements IUnit {
         this.age += Board.millis_per_tick
 
         if (this.age > this.duration) {
-            // TODO: make the spell not exist anymore
+            board.removeUnit(this)
         }
         else { // do spell animation
             this.ticks_per_image = 1000*(this.animationTime/this.images.length) / Board.millis_per_tick // TODO: refactor: move equations so they're not calculated every frame?
@@ -299,6 +299,22 @@ class Spell implements IUnit {
             // Execute spell action
             this.spell(this)
         }
+    }
+
+    surroundingUnits(): Unit[] {
+        let units = []
+        for (let unit of board.units) {
+            if (unit.constructor.name == Unit.name) {
+                let xdis = this.x - unit.x
+                let ydis = this.y - unit.y
+                let netdis = Math.sqrt(xdis**2 + ydis**2)
+
+                if (netdis < (this.size + unit.size)/2) {
+                    units.push(unit)
+                }
+            }
+        }
+        return units
     }
 }
 

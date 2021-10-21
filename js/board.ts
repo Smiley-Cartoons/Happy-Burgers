@@ -22,7 +22,7 @@ class Board {
     /**How far this is pushed down this.canvas (so Units can be rendered at y of zero on this and still show on this.canvas) */
     y_spaces_offset: number = 15
     space_size: number
-    private units: IUnit[] = null
+    private _units: IUnit[] = null
     private healthBarsToRenderAtXY: healthBarInfoTuple[] = []
     static readonly millis_per_tick = 25
     gameIsOver = false
@@ -48,7 +48,7 @@ class Board {
         this.ctx = this.canvas.getContext("2d")
         this.x_spaces = x_spaces
         this.y_spaces = y_spaces
-        this.units = []
+        this._units = []
 
         this.gameIsOver = false
 
@@ -76,10 +76,13 @@ class Board {
             this.renderNoDropZone()
         }
 
-        this.units.sort((u1, u2) => u1.y - u2.y)
+        this._units.sort((u1, u2) => u1.y - u2.y)
         this.healthBarsToRenderAtXY = []
 
-        this.units.forEach((unit, index, array) => {
+        this._units.forEach((unit, index, array) => {
+            if (unit === null) {
+                this._units.splice(index, 1)
+            }
             this.renderUnit(unit)
             if (unit as Unit) {
                 this.healthBarsToRenderAtXY.push([new XYCoord(unit.x, unit.y), unit as Unit])
@@ -125,7 +128,7 @@ class Board {
 
     /** Clears the canvas of units and resets the franchises. */
     clearAll() {
-        this.units = []
+        this._units = []
         this.redFranchise.mainTower = null
         this.redFranchise.units = []
         this.blueFranchise.mainTower = null
@@ -138,7 +141,18 @@ class Board {
             unit.side = side
             side.units.push(unit)
         }
-        this.units.push(unit)
+        this._units.push(unit)
+    }
+
+    removeUnit(unit: IUnit) {
+        let i = this._units.indexOf(unit)
+        if (i > -1) {
+            this._units.splice(i, 1)
+        }
+        i = unit.side.units.indexOf(unit)
+        if (i > -1) {
+            unit.side.units.splice(i, 1)
+        } 
     }
 
     checkIfGameIsOver() {
@@ -232,6 +246,10 @@ class Board {
     }
     boardY(canvasY: number): number {
         return canvasY / this.space_size - this.y_spaces_offset
+    }
+
+    get units(): IUnit[] {
+        return [...this._units]
     }
 }
 
