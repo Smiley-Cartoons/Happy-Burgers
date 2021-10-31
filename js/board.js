@@ -151,7 +151,7 @@ class Board {
     renderUnit(unit) {
         let ratio = (unit.currentImage.width / unit.currentImage.height) * this.space_size;
         let topLeftX = this.canvasX(unit.x) - ratio * unit.size / 2;
-        let topLeftY = this.canvasY(unit.y) - this.space_size * unit.size;
+        let topLeftY = this.canvasY(unit.y) - this.space_size * unit.size * (1 - unit.y_percent_image_to_base);
         let width = ratio * unit.size;
         let height = this.space_size * unit.size;
         this.ctx.drawImage(unit.currentImage, topLeftX, topLeftY, width, height);
@@ -199,7 +199,7 @@ class Board {
         return canvasY / this.space_size - this.y_spaces_offset;
     }
     get units() {
-        return [...this._units];
+        return this._units;
     }
 }
 Board.millis_per_tick = 25;
@@ -285,7 +285,7 @@ function UnitCardClickEvent(event, unitCardId, index) {
     selectedDropUnit.constructor = unitCardUnits[index].constructor;
     DeselectUnitCards();
     document.getElementById(unitCardId).classList.add("unit-card-selected");
-    if (selectedDropUnit) {
+    if (selectedDropUnit.constructor.name !== Spell.name) {
         board.showNoDropZone = true;
     }
 }
@@ -309,7 +309,7 @@ function CanvasClickEvent(event) {
         }
         newUnit = Object.assign(newUnit, selectedDropUnit);
         newUnit.x = mouseBoardX;
-        newUnit.y = mouseBoardY + newUnit.size / 2;
+        newUnit.y = mouseBoardY + newUnit.size / 2 - newUnit.size * newUnit.y_percent_image_to_base;
         newUnit.targetPosition = new XYCoord(board.redFranchise.mainTower.x, board.redFranchise.mainTower.y);
         if (newUnit.constructor.name === Unit.name) {
             newUnit.currentImage = newUnit.images.atRestImages.item(Direction.Up)[0];
@@ -321,6 +321,9 @@ function CanvasClickEvent(event) {
     }
 }
 function userMayDrop(selectedDropUnit, boardX, boardY) {
+    if (selectedDropUnit.constructor.name === Spell.name) {
+        return boardY >= 0;
+    }
     return boardY > (1 - board.usersPercentOfBoard / 100) * board.y_spaces;
 }
 function DeselectUnitCards() {
@@ -345,10 +348,13 @@ function StartGame() {
     let burger = new Unit(Burger.images, Burger.cardImage.src, board.blueFranchise);
     burger = Object.assign(burger, Burger);
     burger.side = board.blueFranchise;
+    let hotDog = new Unit(HotDog.images, HotDog.cardImage.src, board.blueFranchise);
+    hotDog = Object.assign(hotDog, HotDog);
+    hotDog.side = board.blueFranchise;
     let cheese = new Spell();
     cheese = Object.assign(cheese, Cheese);
     cheese.side = board.blueFranchise;
-    let units = [burger, cheese];
+    let units = [burger, hotDog, cheese];
     RenderUnitCards(units);
     board.startGame();
 }

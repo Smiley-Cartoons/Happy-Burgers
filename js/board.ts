@@ -190,7 +190,7 @@ class Board {
     renderUnit(unit: IUnit) {
         let ratio = (unit.currentImage.width / unit.currentImage.height) * this.space_size
         let topLeftX = this.canvasX(unit.x) - ratio*unit.size/2
-        let topLeftY = this.canvasY(unit.y) - this.space_size*unit.size
+        let topLeftY = this.canvasY(unit.y) - this.space_size*unit.size * (1 - unit.y_percent_image_to_base)
         let width = ratio*unit.size
         let height = this.space_size * unit.size
 
@@ -249,7 +249,7 @@ class Board {
     }
 
     get units(): IUnit[] {
-        return [...this._units]
+        return this._units
     }
 }
 
@@ -349,7 +349,7 @@ function UnitCardClickEvent(event: MouseEvent, unitCardId: string, index: number
     DeselectUnitCards()
     document.getElementById(unitCardId).classList.add("unit-card-selected")
     
-    if (selectedDropUnit as Unit) {
+    if (selectedDropUnit.constructor.name !== Spell.name) {
         board.showNoDropZone = true
     }
 }
@@ -375,7 +375,7 @@ function CanvasClickEvent(event: MouseEvent): void {
         }
         newUnit = Object.assign(newUnit, selectedDropUnit)
         newUnit.x = mouseBoardX
-        newUnit.y = mouseBoardY + newUnit.size/2
+        newUnit.y = mouseBoardY + newUnit.size/2 - newUnit.size*newUnit.y_percent_image_to_base
         newUnit.targetPosition = new XYCoord(board.redFranchise.mainTower.x, 
                                             board.redFranchise.mainTower.y)
 
@@ -393,6 +393,9 @@ function CanvasClickEvent(event: MouseEvent): void {
 }
 
 function userMayDrop(selectedDropUnit: IUnit, boardX: number, boardY: number): boolean {
+    if (selectedDropUnit.constructor.name === Spell.name) {
+        return boardY >= 0
+    }
     return boardY > (1 - board.usersPercentOfBoard/100) * board.y_spaces
 }
 
@@ -426,11 +429,15 @@ function StartGame(): void {
     burger = Object.assign(burger, Burger)
     burger.side = board.blueFranchise
 
+    let hotDog = new Unit(HotDog.images, HotDog.cardImage.src, board.blueFranchise)
+    hotDog = Object.assign(hotDog, HotDog)
+    hotDog.side = board.blueFranchise
+
     let cheese = new Spell()
     cheese = Object.assign(cheese, Cheese)
     cheese.side = board.blueFranchise
 
-    let units = [burger, cheese]
+    let units = [burger, hotDog, cheese]
     RenderUnitCards(units)
     board.startGame()
 }

@@ -6,6 +6,17 @@ interface IUnit {
     x: number
     y: number
     size: number
+    /**
+     * Percentage of the height of the IUnit's images you have to move up from the bottom to get to its feet/base.
+     * 
+     * MUST be in range [0, 1]
+     */
+    y_percent_image_to_base: number
+    /**
+     * y coordinate of this IUnit's feet/base
+     */
+    y_of_image_bottom: number
+    y_of_center: number
 
     side: Franchise
     /**how much grease it costs this.side to spawn this */
@@ -29,6 +40,11 @@ class Unit implements IUnit {
     currentImage: HTMLImageElement
     x: number
     y: number
+    y_percent_image_to_base: number = 0
+    get y_of_image_bottom(): number { return this.y + this.size*this.y_percent_image_to_base}
+    set y_of_image_bottom(val: number) { this.y = val - this.size*this.y_percent_image_to_base}
+    get y_of_center(): number { return this.y_of_image_bottom - this.size/2 }
+    set y_of_center(val: number) { this.y_of_image_bottom = val + this.size/2}
     size: number
     health_bar_width = 12
     health_bar_height = 2
@@ -231,6 +247,11 @@ class Spell implements IUnit {
     currentImage: HTMLImageElement = null
     x = 0
     y = 0
+    y_percent_image_to_base: number = 0
+    get y_of_image_bottom(): number { return this.y + this.size*this.y_percent_image_to_base}
+    set y_of_image_bottom(val: number) { this.y = val - this.size*this.y_percent_image_to_base}
+    get y_of_center(): number { return this.y_of_image_bottom - this.size/2 }
+    set y_of_center(val: number) { this.y_of_image_bottom = val + this.size/2}
     size = 0
     side: Franchise = null
     grease_cost = 0
@@ -246,7 +267,8 @@ class Spell implements IUnit {
     /**
      * How many milliseconds this has been around.
      */
-    private age = 0
+    private _age = 0
+    get age(): number { return this._age }
 
     /** 
      * (Must accept one parameter, being of type Spell, that is at runtime the spell calling this function.)
@@ -254,6 +276,10 @@ class Spell implements IUnit {
      * The action this performs every board tick.
      */
     spell: Function = (spell: Spell) => { return spell !== null}
+    /**
+     * All of the Units on the board that this affects.
+     */
+    affectedUnits: Unit[] = []
 
     private img_tick:number = 1
     private img_index:number = 0
@@ -277,9 +303,9 @@ class Spell implements IUnit {
     }
 
     _tick(): void {
-        this.age += Board.millis_per_tick
+        this._age += Board.millis_per_tick
 
-        if (this.age > this.duration) {
+        if (this._age > this.duration) {
             board.removeUnit(this)
         }
         else { // do spell animation
@@ -301,15 +327,19 @@ class Spell implements IUnit {
         }
     }
 
-    surroundingUnits(): Unit[] {
+    /**
+     * Searches the board for Units that overlap self (distance < this.size + unit.size)
+     * @returns An array of these overlapping Units
+     */
+    overlappingUnits(): Unit[] {
         let units = []
         for (let unit of board.units) {
             if (unit.constructor.name == Unit.name) {
                 let xdis = this.x - unit.x
-                let ydis = this.y - unit.y
+                let ydis = this.y_of_center - unit.y_of_center
                 let netdis = Math.sqrt(xdis**2 + ydis**2)
 
-                if (netdis < (this.size + unit.size)/2) {
+                if (netdis < (this.size + unit.size)/2) { // TODO: Algorithm breaks down with wide and skinny spells... have something that accounts for the elliptical nature of spells?
                     units.push(unit)
                 }
             }
@@ -319,6 +349,9 @@ class Spell implements IUnit {
 }
 
 
+function round(num: number, dec: number): number {
+    return Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
+}
 
 
 
@@ -334,14 +367,25 @@ const Cheese = new Spell(["images/Spells/Cheese/Cheese_Melting1.png",
                           "images/Spells/Cheese/Cheese_Melting2.png", 
                           "images/Spells/Cheese/Cheese_Melting3.png"],
                           "images/Spells/Cheese/Cheeseblock1.png")
-Cheese.spell = (spell: Spell) => {//TODO: implement slow down unit
-                                    }
-Cheese.duration = 2000
+Cheese.spell = (spell: Spell) => {
+    // reset units' speed
+    for (let u of spell.affectedUnits) {
+        u.speed = round(u.speed / CHEESE_SPEED_CUT, 4) // round to ensure speed goes back to the correct value
+    }
+    if (spell.age + Board.millis_per_tick > spell.duration) {return} // this way if spell is about to die, a bunch of units aren't left permanently slowed
+    spell.affectedUnits = spell.overlappingUnits()
+    // affect all surrounding units
+    for (let u of spell.affectedUnits) {
+        u.speed *= CHEESE_SPEED_CUT
+    }
+}
+Cheese.duration = 25000
 Cheese.grease_cost = 2
-Cheese.size = 8
+Cheese.size = 16
 Cheese.speed = 0
 Cheese.damage = 0
-
+/**Percent (well, 1 is 100%) of units' speed left once affected by cheese.*/
+const CHEESE_SPEED_CUT = 0.25
 
 let burgerImages = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Walking_Left2.png"], ["images/Burger/Burger_Walking_Right2.png"]))
 burgerImages.movingImages = new UnitGroupItemsByDirection(
@@ -356,12 +400,30 @@ burgerImages.dyingImages = new UnitGroupItemsByDirection(
                                 ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
                                 ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"])
 
-const Burger = new Unit(burgerImages, "images/Burger/Burger_Walking_Down1.jpg", null)
-Burger.health = 100
+const Burger = new Unit(burgerImages, "images/Burger/Burger_Walking_Down1.jpg", null, 100)
 Burger.grease_cost = 2
-Burger.size = 5
-Burger.speed = 0.5
+Burger.size = 6
+Burger.speed = 0.4
 Burger.damage = 15
 
 
 
+let hotDogImages = new UnitImages(new UnitGroupItemsByDirection(["images/Hotdog/Hotdog_Walking_Down1.png"], ["images/Hotdog/Hotdog_Walking_Down1.png"], ["images/Hotdog/Hotdog_Walking_Down1.png"], ["images/Hotdog/Hotdog_Walking_Down1.png"]))
+hotDogImages.movingImages = new UnitGroupItemsByDirection(
+    ["images/Hotdog/Hotdog_Walking_Down2.png","images/Hotdog/Hotdog_Walking_Down1.png", "images/Hotdog/Hotdog_Walking_Down2.png", "images/Hotdog/Hotdog_Walking_Down3.png"],
+    ["images/Hotdog/Hotdog_Walking_Down2.png","images/Hotdog/Hotdog_Walking_Down1.png", "images/Hotdog/Hotdog_Walking_Down2.png", "images/Hotdog/Hotdog_Walking_Down3.png"],
+    ["images/Hotdog/Hotdog_Walking_Down2.png","images/Hotdog/Hotdog_Walking_Down1.png", "images/Hotdog/Hotdog_Walking_Down2.png", "images/Hotdog/Hotdog_Walking_Down3.png"],
+    ["images/Hotdog/Hotdog_Walking_Down2.png","images/Hotdog/Hotdog_Walking_Down1.png", "images/Hotdog/Hotdog_Walking_Down2.png", "images/Hotdog/Hotdog_Walking_Down3.png"]
+)
+hotDogImages.dyingImages = new UnitGroupItemsByDirection(
+    ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+    ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+    ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+    ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"])
+
+const HotDog = new Unit(hotDogImages, "images/Hotdog/Hotdog_Walking_Down2.png", null, 85)
+HotDog.grease_cost = 3
+HotDog.size = 20
+HotDog.speed = 0.7
+HotDog.damage = 35
+HotDog.y_percent_image_to_base = 0.4
