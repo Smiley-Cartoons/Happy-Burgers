@@ -6,6 +6,17 @@ interface IUnit {
     x: number
     y: number
     size: number
+    /**
+     * Percentage of the height of the IUnit's images you have to move up from the bottom to get to its feet/base.
+     * 
+     * MUST be in range [0, 1]
+     */
+    y_percent_image_to_base: number
+    /**
+     * y coordinate of this IUnit's feet/base
+     */
+    y_of_image_bottom: number
+    y_of_center: number
 
     side: Franchise
     /**how much grease it costs this.side to spawn this */
@@ -29,6 +40,11 @@ class Unit implements IUnit {
     currentImage: HTMLImageElement
     x: number
     y: number
+    y_percent_image_to_base: number = 0
+    get y_of_image_bottom(): number { return this.y + this.size*this.y_percent_image_to_base}
+    set y_of_image_bottom(val: number) { this.y = val - this.size*this.y_percent_image_to_base}
+    get y_of_center(): number { return this.y_of_image_bottom - this.size/2 }
+    set y_of_center(val: number) { this.y_of_image_bottom = val + this.size/2}
     size: number
     health_bar_width = 12
     health_bar_height = 2
@@ -231,6 +247,11 @@ class Spell implements IUnit {
     currentImage: HTMLImageElement = null
     x = 0
     y = 0
+    y_percent_image_to_base: number = 0
+    get y_of_image_bottom(): number { return this.y + this.size*this.y_percent_image_to_base}
+    set y_of_image_bottom(val: number) { this.y = val - this.size*this.y_percent_image_to_base}
+    get y_of_center(): number { return this.y_of_image_bottom - this.size/2 }
+    set y_of_center(val: number) { this.y_of_image_bottom = val + this.size/2}
     size = 0
     side: Franchise = null
     grease_cost = 0
@@ -315,7 +336,7 @@ class Spell implements IUnit {
         for (let unit of board.units) {
             if (unit.constructor.name == Unit.name) {
                 let xdis = this.x - unit.x
-                let ydis = this.y - unit.y
+                let ydis = this.y_of_center - unit.y_of_center
                 let netdis = Math.sqrt(xdis**2 + ydis**2)
 
                 if (netdis < (this.size + unit.size)/2) { // TODO: Algorithm breaks down with wide and skinny spells... have something that accounts for the elliptical nature of spells?
@@ -379,12 +400,30 @@ burgerImages.dyingImages = new UnitGroupItemsByDirection(
                                 ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
                                 ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"])
 
-const Burger = new Unit(burgerImages, "images/Burger/Burger_Walking_Down1.jpg", null)
-Burger.health = 100
+const Burger = new Unit(burgerImages, "images/Burger/Burger_Walking_Down1.jpg", null, 100)
 Burger.grease_cost = 2
-Burger.size = 5
-Burger.speed = 0.5
+Burger.size = 6
+Burger.speed = 0.4
 Burger.damage = 15
 
 
 
+let hotDogImages = new UnitImages(new UnitGroupItemsByDirection(["images/Hotdog/Hotdog_Walking_Down1.png"], ["images/Hotdog/Hotdog_Walking_Down1.png"], ["images/Hotdog/Hotdog_Walking_Down1.png"], ["images/Hotdog/Hotdog_Walking_Down1.png"]))
+hotDogImages.movingImages = new UnitGroupItemsByDirection(
+    ["images/Hotdog/Hotdog_Walking_Down2.png","images/Hotdog/Hotdog_Walking_Down1.png", "images/Hotdog/Hotdog_Walking_Down2.png", "images/Hotdog/Hotdog_Walking_Down3.png"],
+    ["images/Hotdog/Hotdog_Walking_Down2.png","images/Hotdog/Hotdog_Walking_Down1.png", "images/Hotdog/Hotdog_Walking_Down2.png", "images/Hotdog/Hotdog_Walking_Down3.png"],
+    ["images/Hotdog/Hotdog_Walking_Down2.png","images/Hotdog/Hotdog_Walking_Down1.png", "images/Hotdog/Hotdog_Walking_Down2.png", "images/Hotdog/Hotdog_Walking_Down3.png"],
+    ["images/Hotdog/Hotdog_Walking_Down2.png","images/Hotdog/Hotdog_Walking_Down1.png", "images/Hotdog/Hotdog_Walking_Down2.png", "images/Hotdog/Hotdog_Walking_Down3.png"]
+)
+hotDogImages.dyingImages = new UnitGroupItemsByDirection(
+    ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+    ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+    ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"],
+    ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"])
+
+const HotDog = new Unit(hotDogImages, "images/Hotdog/Hotdog_Walking_Down2.png", null, 85)
+HotDog.grease_cost = 3
+HotDog.size = 20
+HotDog.speed = 0.7
+HotDog.damage = 35
+HotDog.y_percent_image_to_base = 0.4
