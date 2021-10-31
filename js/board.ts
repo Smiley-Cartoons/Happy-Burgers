@@ -249,7 +249,7 @@ class Board {
     }
 
     get units(): IUnit[] {
-        return [...this._units]
+        return this._units
     }
 }
 

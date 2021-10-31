@@ -199,7 +199,7 @@ class Board {
         return canvasY / this.space_size - this.y_spaces_offset;
     }
     get units() {
-        return [...this._units];
+        return this._units;
     }
 }
 Board.millis_per_tick = 25;

@@ -246,7 +246,8 @@ class Spell implements IUnit {
     /**
      * How many milliseconds this has been around.
      */
-    private age = 0
+    private _age = 0
+    get age(): number { return this._age }
 
     /** 
      * (Must accept one parameter, being of type Spell, that is at runtime the spell calling this function.)
@@ -254,6 +255,10 @@ class Spell implements IUnit {
      * The action this performs every board tick.
      */
     spell: Function = (spell: Spell) => { return spell !== null}
+    /**
+     * All of the Units on the board that this affects.
+     */
+    affectedUnits: Unit[] = []
 
     private img_tick:number = 1
     private img_index:number = 0
@@ -277,9 +282,9 @@ class Spell implements IUnit {
     }
 
     _tick(): void {
-        this.age += Board.millis_per_tick
+        this._age += Board.millis_per_tick
 
-        if (this.age > this.duration) {
+        if (this._age > this.duration) {
             board.removeUnit(this)
         }
         else { // do spell animation
@@ -301,7 +306,11 @@ class Spell implements IUnit {
         }
     }
 
-    surroundingUnits(): Unit[] {
+    /**
+     * Searches the board for Units that overlap self (distance < this.size + unit.size)
+     * @returns An array of these overlapping Units
+     */
+    overlappingUnits(): Unit[] {
         let units = []
         for (let unit of board.units) {
             if (unit.constructor.name == Unit.name) {
@@ -309,7 +318,7 @@ class Spell implements IUnit {
                 let ydis = this.y - unit.y
                 let netdis = Math.sqrt(xdis**2 + ydis**2)
 
-                if (netdis < (this.size + unit.size)/2) {
+                if (netdis < (this.size + unit.size)/2) { // TODO: Algorithm breaks down with wide and skinny spells... have something that accounts for the elliptical nature of spells?
                     units.push(unit)
                 }
             }
@@ -319,6 +328,9 @@ class Spell implements IUnit {
 }
 
 
+function round(num: number, dec: number): number {
+    return Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
+}
 
 
 
@@ -334,14 +346,25 @@ const Cheese = new Spell(["images/Spells/Cheese/Cheese_Melting1.png",
                           "images/Spells/Cheese/Cheese_Melting2.png", 
                           "images/Spells/Cheese/Cheese_Melting3.png"],
                           "images/Spells/Cheese/Cheeseblock1.png")
-Cheese.spell = (spell: Spell) => {//TODO: implement slow down unit
-                                    }
-Cheese.duration = 2000
+Cheese.spell = (spell: Spell) => {
+    // reset units' speed
+    for (let u of spell.affectedUnits) {
+        u.speed = round(u.speed / CHEESE_SPEED_CUT, 4) // round to ensure speed goes back to the correct value
+    }
+    if (spell.age + Board.millis_per_tick > spell.duration) {return} // this way if spell is about to die, a bunch of units aren't left permanently slowed
+    spell.affectedUnits = spell.overlappingUnits()
+    // affect all surrounding units
+    for (let u of spell.affectedUnits) {
+        u.speed *= CHEESE_SPEED_CUT
+    }
+}
+Cheese.duration = 25000
 Cheese.grease_cost = 2
-Cheese.size = 8
+Cheese.size = 16
 Cheese.speed = 0
 Cheese.damage = 0
-
+/**Percent (well, 1 is 100%) of units' speed left once affected by cheese.*/
+const CHEESE_SPEED_CUT = 0.25
 
 let burgerImages = new UnitImages(new UnitGroupItemsByDirection(["images/Burger/Burger_Walking_Up1.png"], ["images/Burger/Burger_Walking_Down1.jpg"], ["images/Burger/Burger_Walking_Left2.png"], ["images/Burger/Burger_Walking_Right2.png"]))
 burgerImages.movingImages = new UnitGroupItemsByDirection(
