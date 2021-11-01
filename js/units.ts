@@ -7,15 +7,15 @@ interface IUnit {
     y: number
     size: number
     /**
-     * Percentage of the height of the IUnit's images you have to move up from the bottom to get to its feet/base.
+     * Size of image margin (image content not included in the boundary of this.size) on the top and bottom of this
+     * Unit of measurement is y_img_margin of 1 == this.size
      * 
-     * MUST be in range [0, 1]
+     * Must be >= 0
      */
-    y_percent_image_to_base: number
+    y_img_margin: number
     /**
      * y coordinate of this IUnit's feet/base
      */
-    y_of_image_bottom: number
     y_of_center: number
 
     side: Franchise
@@ -40,11 +40,9 @@ class Unit implements IUnit {
     currentImage: HTMLImageElement
     x: number
     y: number
-    y_percent_image_to_base: number = 0
-    get y_of_image_bottom(): number { return this.y + this.size*this.y_percent_image_to_base}
-    set y_of_image_bottom(val: number) { this.y = val - this.size*this.y_percent_image_to_base}
-    get y_of_center(): number { return this.y_of_image_bottom - this.size/2 }
-    set y_of_center(val: number) { this.y_of_image_bottom = val + this.size/2}
+    y_img_margin: number = 0
+    get y_of_center(): number { return this.y - this.size/2 }
+    set y_of_center(val: number) { this.y = val + this.size/2}
     size: number
     health_bar_width = 12
     health_bar_height = 2
@@ -242,16 +240,14 @@ enum Direction {
 
 
 class Spell implements IUnit {
-    images: HTMLImageElement[] = [] // TODO: finish spell class
+    images: HTMLImageElement[] = []
     cardImage: HTMLImageElement = null
     currentImage: HTMLImageElement = null
     x = 0
     y = 0
-    y_percent_image_to_base: number = 0
-    get y_of_image_bottom(): number { return this.y + this.size*this.y_percent_image_to_base}
-    set y_of_image_bottom(val: number) { this.y = val - this.size*this.y_percent_image_to_base}
-    get y_of_center(): number { return this.y_of_image_bottom - this.size/2 }
-    set y_of_center(val: number) { this.y_of_image_bottom = val + this.size/2}
+    y_img_margin: number = 0
+    get y_of_center(): number { return this.y - this.size/2 }
+    set y_of_center(val: number) { this.y = val + this.size/2}
     size = 0
     side: Franchise = null
     grease_cost = 0
@@ -423,7 +419,8 @@ hotDogImages.dyingImages = new UnitGroupItemsByDirection(
 
 const HotDog = new Unit(hotDogImages, "images/Hotdog/Hotdog_Walking_Down2.png", null, 85)
 HotDog.grease_cost = 3
-HotDog.size = 20
+HotDog.size = 5
 HotDog.speed = 0.7
 HotDog.damage = 35
-HotDog.y_percent_image_to_base = 0.4
+HotDog.y_img_margin = 1.6
+HotDog.health_bar_width = 6

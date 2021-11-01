@@ -14,7 +14,7 @@ class Unit {
      */
     constructor(images, cardImage, side, health = 100, x = 0, y = 0, grease_cost = 1, size = 5, speed = 0, damage = 0, armor = 0, armorPiercing = 0) {
         this.cardImage = null;
-        this.y_percent_image_to_base = 0;
+        this.y_img_margin = 0;
         this.health_bar_width = 12;
         this.health_bar_height = 2;
         this.img_tick = 1;
@@ -50,10 +50,8 @@ class Unit {
         this.health_bar_width = size * 4 / 5;
         this.health_bar_height = this.health_bar_width / 6;
     }
-    get y_of_image_bottom() { return this.y + this.size * this.y_percent_image_to_base; }
-    set y_of_image_bottom(val) { this.y = val - this.size * this.y_percent_image_to_base; }
-    get y_of_center() { return this.y_of_image_bottom - this.size / 2; }
-    set y_of_center(val) { this.y_of_image_bottom = val + this.size / 2; }
+    get y_of_center() { return this.y - this.size / 2; }
+    set y_of_center(val) { this.y = val + this.size / 2; }
     _tick() {
         if (this.health <= 0) {
             // TODO: make the unit die
@@ -187,12 +185,12 @@ var Direction;
 })(Direction || (Direction = {}));
 class Spell {
     constructor(images = null, cardImage = null) {
-        this.images = []; // TODO: finish spell class
+        this.images = [];
         this.cardImage = null;
         this.currentImage = null;
         this.x = 0;
         this.y = 0;
-        this.y_percent_image_to_base = 0;
+        this.y_img_margin = 0;
         this.size = 0;
         this.side = null;
         this.grease_cost = 0;
@@ -235,10 +233,8 @@ class Spell {
             this.cardImage.src = cardImage;
         }
     }
-    get y_of_image_bottom() { return this.y + this.size * this.y_percent_image_to_base; }
-    set y_of_image_bottom(val) { this.y = val - this.size * this.y_percent_image_to_base; }
-    get y_of_center() { return this.y_of_image_bottom - this.size / 2; }
-    set y_of_center(val) { this.y_of_image_bottom = val + this.size / 2; }
+    get y_of_center() { return this.y - this.size / 2; }
+    set y_of_center(val) { this.y = val + this.size / 2; }
     get age() { return this._age; }
     _tick() {
         this._age += Board.millis_per_tick;
@@ -325,7 +321,8 @@ hotDogImages.movingImages = new UnitGroupItemsByDirection(["images/Hotdog/Hotdog
 hotDogImages.dyingImages = new UnitGroupItemsByDirection(["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"], ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"], ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"], ["images/Unit Deaths/Ketchupandmustard_BlowUp1.png", "images/Unit Deaths/Ketchupandmustard_BlowUp2.png", "images/Unit Deaths/Ketchupandmustard_BlowUp3.png"]);
 const HotDog = new Unit(hotDogImages, "images/Hotdog/Hotdog_Walking_Down2.png", null, 85);
 HotDog.grease_cost = 3;
-HotDog.size = 20;
+HotDog.size = 5;
 HotDog.speed = 0.7;
 HotDog.damage = 35;
-HotDog.y_percent_image_to_base = 0.4;
+HotDog.y_img_margin = 1.6;
+HotDog.health_bar_width = 6;
