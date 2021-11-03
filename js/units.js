@@ -1,6 +1,6 @@
 "use strict";
 /**
- * A tower/soldier/whatever to fight for a Side on a game Board
+ * A tower/soldier/whatever to fight for a Side on a game Board.
  */
 class Unit {
     /**

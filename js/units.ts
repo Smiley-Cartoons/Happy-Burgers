@@ -5,6 +5,9 @@ interface IUnit {
     currentImage: HTMLImageElement
     x: number
     y: number
+    /**
+     * the size of the unit, ie it's height in board spaces
+     */
     size: number
     /**
      * Percentage of the height of the IUnit's images you have to move up from the bottom to get to its feet/base.
@@ -32,7 +35,7 @@ interface IUnit {
 }
 
 /**
- * A tower/soldier/whatever to fight for a Side on a game Board
+ * A tower/soldier/whatever to fight for a Side on a game Board.
  */
 class Unit implements IUnit {
     images: UnitImages
