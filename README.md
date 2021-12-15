@@ -1,3 +1,3 @@
-# Happy Burgers is a free battle royale game where the best burger commander wins!
+# Happy Burgers is a battle game where you fight your enemy with burgers.
 
-The finished game will be accessable online whenever we finish it, which will probably be sometime in October 2021.
+The finished game will be accessable online when it is complete.
