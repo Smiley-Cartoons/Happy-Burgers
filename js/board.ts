@@ -188,11 +188,11 @@ class Board {
      * @param unit the Unit that gets drawn on the this.canvas
      */
     renderUnit(unit: IUnit) {
-        let ratio = (unit.currentImage.width / unit.currentImage.height) * this.space_size
-        let topLeftX = this.canvasX(unit.x) - ratio*unit.size/2
-        let topLeftY = this.canvasY(unit.y) - this.space_size*unit.size * (1 - unit.y_percent_image_to_base)
-        let width = ratio*unit.size
-        let height = this.space_size * unit.size
+        let ratio = (unit.currentImage.width / unit.currentImage.height)
+        let topLeftX = this.canvasX(unit.x - ratio*(unit.size*(1/2 + unit.y_img_margin)))
+        let topLeftY = this.canvasY(unit.y - unit.size*(1 + unit.y_img_margin))
+        let width = ratio*unit.size*(1 + 2*unit.y_img_margin) * this.space_size
+        let height = this.space_size * unit.size * (1 + 2*unit.y_img_margin)
 
         this.ctx.drawImage(unit.currentImage, 
                         topLeftX, topLeftY, 
@@ -375,7 +375,7 @@ function CanvasClickEvent(event: MouseEvent): void {
         }
         newUnit = Object.assign(newUnit, selectedDropUnit)
         newUnit.x = mouseBoardX
-        newUnit.y = mouseBoardY + newUnit.size/2 - newUnit.size*newUnit.y_percent_image_to_base
+        newUnit.y_of_center = mouseBoardY
         newUnit.targetPosition = new XYCoord(board.redFranchise.mainTower.x, 
                                             board.redFranchise.mainTower.y)
 
